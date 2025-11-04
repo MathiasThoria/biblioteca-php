@@ -27,7 +27,7 @@ class ControladorFrente {
 
         // Llamamos a la acción si existe
         if (method_exists($ctrl, $accion)) {
-            $ctrl->$accion();
+            $ctrl->$accion($_POST);
         } else {
             echo "Acción '$accion' no encontrada en el controlador '$controlador'.";
         }

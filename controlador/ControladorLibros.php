@@ -13,8 +13,7 @@ class ControladorLibros
     // LISTAR TODOS LOS LIBROS
     public function listar()
     {
-        $libros = $this->libroModel->getAll();
-        // Aquí iría la vista
+        $libros = $this->libroModel->getAll();        
         include(__DIR__ . '/../vista/VistaLibros.php');
     }
 
@@ -26,12 +25,22 @@ class ControladorLibros
     }
 
     // CREAR NUEVO LIBRO
-    public function crear($datos)
-    {
-        $this->libroModel->create($datos);
-        // Redirigir a listar
-        $this->listar();
-    }
+    public function crear($datos = null) {
+        //var_dump($datos);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($datos)) {
+            // Procesar datos y guardar libro
+            $this->libroModel->create($datos);
+            // $this->modelo->insertar($datos);
+      
+            header("Location: index.php?controlador=libros&accion=listar");
+            //$this->listar();
+            exit;
+        } else {
+            // Mostrar formulario
+            $libro = null; // vacío para un libro nuevo
+            include(__DIR__ . "/../vista/formularioLibro.php");
+        }
+    }   
 
     // EDITAR LIBRO
     public function editar($id, $datos)
