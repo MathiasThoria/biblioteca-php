@@ -15,14 +15,14 @@ class ControladorLibros
     {
         $libros = $this->libroModel->getAll();
         // Aquí iría la vista
-        include("../vista/VistaLibros.php");
+        include(__DIR__ . '/../vista/VistaLibros.php');
     }
 
     // VER UN LIBRO POR ID
     public function ver($id)
     {
         $libro = $this->libroModel->getById($id);
-        include("../vista/VistaLibroDetalle.php");
+        include("/vista/VistaLibroDetalle.php");
     }
 
     // CREAR NUEVO LIBRO
