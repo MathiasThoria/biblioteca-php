@@ -30,10 +30,7 @@ class ControladorLibros
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($datos)) {
             // Procesar datos y guardar libro
             $this->libroModel->create($datos);
-            // $this->modelo->insertar($datos);
-      
-            header("Location: index.php?controlador=libros&accion=listar");
-            //$this->listar();
+            header("Location: index.php?controlador=libros&accion=listar");            
             exit;
         } else {
             // Mostrar formulario
@@ -50,10 +47,13 @@ class ControladorLibros
     }
 
     // ELIMINAR LIBRO
-    public function eliminar($id)
-    {
+   public function eliminar() {
+    if (isset($_GET['id'])) {
+        $id = $_GET['id'];
         $this->libroModel->delete($id);
-        $this->listar();
+    }
+    header("Location: index.php?controlador=libros&accion=listar");
+    exit;
     }
 }
 

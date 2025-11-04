@@ -59,7 +59,7 @@
                         <?php if (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'administrador'): ?>
                             <a href="index.php?controlador=libros&accion=editar&id=<?php echo $libro['id']; ?>">Editar</a>
                             <a href="index.php?controlador=libros&accion=eliminar&id=<?php echo $libro['id']; ?>"
-                        onclick="return confirm('¿Seguro que quieres eliminar este libro?')">Eliminar</a>
+                                onclick="return confirm('¿Seguro que quieres eliminar este libro?')">Eliminar</a>
                         <?php endif; ?>                  
                     </td>
                 </tr>
