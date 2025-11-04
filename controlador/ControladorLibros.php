@@ -11,49 +11,62 @@ class ControladorLibros
     }
 
     // LISTAR TODOS LOS LIBROS
-    public function listar()
+    public function listar($get = [], $post = [])
     {
         $libros = $this->libroModel->getAll();        
         include(__DIR__ . '/../vista/VistaLibros.php');
     }
 
     // VER UN LIBRO POR ID
-    public function ver($id)
+    public function ver($get = [], $post = [])
     {
+        $id = $get['id'] ?? null;
         $libro = $this->libroModel->getById($id);
-        include("/vista/VistaLibroDetalle.php");
+        include(__DIR__ . "/../vista/VistaLibroDetalle.php");
     }
 
     // CREAR NUEVO LIBRO
-    public function crear($datos = null) {
-        //var_dump($datos);
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($datos)) {
-            // Procesar datos y guardar libro
-            $this->libroModel->create($datos);
+    public function crear($get = [], $post = []) 
+    {
+        if (!empty($post)) {
+            $this->libroModel->create($post);
             header("Location: index.php?controlador=libros&accion=listar");            
             exit;
         } else {
-            // Mostrar formulario
             $libro = null; // vacío para un libro nuevo
             include(__DIR__ . "/../vista/formularioLibro.php");
         }
     }   
 
     // EDITAR LIBRO
-    public function editar($id, $datos)
+    public function editar($get = [], $post = [])
     {
-        $this->libroModel->update($id, $datos);
-        $this->listar();
+        $id = $get['id'] ?? null;
+        if (!empty($post)) {
+            $datos = [
+                'titulo'    => $post['titulo'] ?? '',
+                'autor'     => $post['autor'] ?? '',
+                'isbn'      => $post['isbn'] ?? '',
+                'editorial' => $post['editorial'] ?? ''
+            ];
+            $this->libroModel->update($id, $datos);
+            header("Location: index.php?controlador=libros&accion=listar");
+            exit;
+        } else {
+            $libro = $this->libroModel->getById($id);
+            include(__DIR__ . "/../vista/formularioLibro.php");
+        }
     }
 
     // ELIMINAR LIBRO
-   public function eliminar() {
-    if (isset($_GET['id'])) {
-        $id = $_GET['id'];
-        $this->libroModel->delete($id);
-    }
-    header("Location: index.php?controlador=libros&accion=listar");
-    exit;
+    public function eliminar($get = [], $post = [])
+    {
+        $id = $get['id'] ?? null;
+        if ($id) {
+            $this->libroModel->delete($id);
+        }
+        header("Location: index.php?controlador=libros&accion=listar");
+        exit;
     }
 }
-
+?>

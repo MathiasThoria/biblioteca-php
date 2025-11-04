@@ -48,10 +48,6 @@ $accion = $id ? 'editar&id=' . $id : 'crear';
 <h2 style="text-align:center;"><?php echo $id ? "Editar Libro" : "Agregar Libro"; ?></h2>
 
 
-<?php
-// qutiar cuando el form sirva para modificar
-$accion = isset($libro['id']) ? 'editar&id=' . $libro['id'] : 'crear';
-?>
 
 
 <form action="index.php?controlador=libros&accion=<?php echo $accion; ?>" method="POST">
