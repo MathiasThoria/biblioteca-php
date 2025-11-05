@@ -28,7 +28,7 @@
                     <td><?php echo $ej['id_ejemplar']; ?></td>
                     <td><?php echo $ej['estado']; ?></td>
                     <td>
-                        <a href="index.php?controlador=ejemplares&accion=editar&id=<?php echo $ej['id_ejemplar']; ?>">Editar</a>
+                        <a href="index.php?controlador=ejemplares&accion=editar&id_ejemplar=<?php echo $ej['id_ejemplar']; ?>">Editar</a>
                         <a href="index.php?controlador=ejemplares&accion=eliminar&id_ejemplar=<?php echo $ej['id_ejemplar']; ?>&id_libro=<?php echo $libro['id']; ?>" 
                         onclick="return confirm('¿Seguro que querés eliminar este ejemplar?');">Eliminar</a>    
                     </td>

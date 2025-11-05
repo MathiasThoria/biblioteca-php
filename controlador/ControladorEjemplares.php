@@ -7,7 +7,6 @@ class ControladorEjemplares
     private $ejemplarModel;
     private $libroModel;
 
-
     public function __construct()
     {
         $this->ejemplarModel = new Ejemplar();
@@ -19,18 +18,34 @@ class ControladorEjemplares
     {
         $id_libro = $get['id_libro'] ?? null;
 
-        if ($id_libro) {
-            // Traer información del libro
-            $libro = $this->libroModel->getById($id_libro);
-
-            // Traer los ejemplares asociados
-            $ejemplares = $this->ejemplarModel->getByLibro($id_libro);
-
-            // Incluir la vista y pasar $libro y $ejemplares
-            include(__DIR__ . '/../vista/VistaEjemplares.php');
-        } else {
+        if (!$id_libro) {
             echo "No se especificó un libro.";
+            return;
         }
+
+        $libro = $this->libroModel->getById($id_libro);
+        $ejemplares = $this->ejemplarModel->getByLibro($id_libro);
+
+        include(__DIR__ . '/../vista/VistaEjemplares.php');
+    }
+
+    // FORMULARIO COMÚN PARA CREAR Y EDITAR
+    private function formulario($ejemplar = null, $id_libro = null)
+    {
+        if ($ejemplar) {
+            // Si es edición
+            $id_ejemplar = $ejemplar['id_ejemplar'];
+            $estado = $ejemplar['estado'];
+            $id_libro = $ejemplar['id_libro'];
+            $accion = 'editar';
+        } else {
+            // Si es creación
+            $id_ejemplar = '';
+            $estado = 'disponible';
+            $accion = 'crear';
+        }
+
+        include(__DIR__ . "/../vista/formularioEjemplar.php");
     }
 
     // CREAR NUEVO EJEMPLAR
@@ -44,25 +59,31 @@ class ControladorEjemplares
             $this->ejemplarModel->create($datos);
             header("Location: index.php?controlador=ejemplares&accion=listar&id_libro=" . $post['id_libro']);
             exit;
-        } else {
-            $id_libro = $get['id_libro'] ?? null;
-            include(__DIR__ . "/../vista/formularioEjemplar.php");
         }
+
+        $id_libro = $get['id_libro'] ?? null;
+        $this->formulario(null, $id_libro);
     }
 
     // EDITAR EJEMPLAR
     public function editar($get = [], $post = [])
     {
-        $id = $get['id'] ?? null;
+        $id_ejemplar = $get['id_ejemplar'] ?? null;
+
+        if (!$id_ejemplar) {
+            echo "No se especificó un ejemplar.";
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($post)) {
             $datos = ['estado' => $post['estado']];
-            $this->ejemplarModel->update($id, $datos);
+            $this->ejemplarModel->update($id_ejemplar, $datos);
             header("Location: index.php?controlador=ejemplares&accion=listar&id_libro=" . $post['id_libro']);
             exit;
-        } else {
-            $ejemplar = $this->ejemplarModel->getById($id);
-            include(__DIR__ . "/../vista/formularioEjemplar.php");
         }
+
+        $ejemplar = $this->ejemplarModel->getById($id_ejemplar);
+        $this->formulario($ejemplar);
     }
 
     // ELIMINAR EJEMPLAR
@@ -70,9 +91,11 @@ class ControladorEjemplares
     {
         $id_ejemplar = $get['id_ejemplar'] ?? null;
         $id_libro = $get['id_libro'] ?? null;
+
         if ($id_ejemplar) {
             $this->ejemplarModel->delete($id_ejemplar);
         }
+
         header("Location: index.php?controlador=ejemplares&accion=listar&id_libro=" . $id_libro);
         exit;
     }

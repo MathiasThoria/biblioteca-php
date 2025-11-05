@@ -1,16 +1,17 @@
 <?php
 // formularioEjemplar.php
 
-// $id_libro viene del controlador
-$id_libro = $id_libro ?? '';
-$estado = 'disponible'; // por defecto
+// $ejemplar viene del controlador cuando es edición
+$id_libro = $ejemplar['id_libro'] ?? $id_libro ?? '';
+$estado   = $ejemplar['estado'] ?? 'disponible';
+$accion   = isset($ejemplar) ? "editar&id_ejemplar=" . $ejemplar['id_ejemplar'] : "crear";
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Agregar Ejemplar</title>
+    <title><?php echo isset($ejemplar) ? "Editar Ejemplar" : "Agregar Ejemplar"; ?></title>
     <style>
         form {
             width: 300px;
@@ -23,11 +24,12 @@ $estado = 'disponible'; // por defecto
             display: block;
             margin-top: 10px;
         }
-        input, select, button {
+        input, select, button, a {
             width: 100%;
             padding: 6px;
             margin-top: 4px;
             box-sizing: border-box;
+            text-decoration: none;
         }
         button {
             cursor: pointer;
@@ -36,18 +38,18 @@ $estado = 'disponible'; // por defecto
 </head>
 <body>
 
-<h2 style="text-align:center;">Agregar Ejemplar</h2>
+<h2 style="text-align:center;"><?php echo isset($ejemplar) ? "Editar Ejemplar" : "Agregar Ejemplar"; ?></h2>
 
-<form action="index.php?controlador=ejemplares&accion=crear" method="POST">
+<form action="index.php?controlador=ejemplares&accion=<?php echo $accion; ?>" method="POST">
     <input type="hidden" name="id_libro" value="<?php echo htmlspecialchars($id_libro); ?>">
 
     <label>Estado:</label>
     <select name="estado" required>
-        <option value="disponible" selected>Disponible</option>
-        <option value="prestado">Prestado</option>
+        <option value="disponible" <?php echo $estado=='disponible' ? 'selected' : ''; ?>>Disponible</option>
+        <option value="prestado" <?php echo $estado=='prestado' ? 'selected' : ''; ?>>Prestado</option>
     </select>
 
-    <button type="submit">Agregar Ejemplar</button>
+    <button type="submit"><?php echo isset($ejemplar) ? "Actualizar" : "Agregar"; ?></button>
     <a href="index.php?controlador=ejemplares&accion=listar&id_libro=<?php echo $id_libro; ?>">Cancelar</a>
 </form>
 
