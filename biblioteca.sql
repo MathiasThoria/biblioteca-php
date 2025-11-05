@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 04, 2025 at 10:53 PM
+-- Generation Time: Nov 05, 2025 at 02:45 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -29,9 +29,18 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `ejemplar` (
   `id_ejemplar` int(11) NOT NULL,
-  `isbn` char(13) NOT NULL,
-  `estado` enum('disponible','prestado') DEFAULT 'disponible'
+  `estado` enum('disponible','prestado') DEFAULT 'disponible',
+  `id_libro` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ejemplar`
+--
+
+INSERT INTO `ejemplar` (`id_ejemplar`, `estado`, `id_libro`) VALUES
+(1, 'disponible', 1),
+(6, 'disponible', 1),
+(7, 'disponible', 1);
 
 -- --------------------------------------------------------
 
@@ -52,9 +61,9 @@ CREATE TABLE `libros` (
 --
 
 INSERT INTO `libros` (`id`, `isbn`, `titulo`, `editorial`, `autor`) VALUES
-(1, '1231857', 'No es facil', NULL, 'toto'),
-(2, '1651435561', 'Llenalo todo', NULL, 'Pospicle'),
-(3, '12341354', 'El princhipito', 'Moco', 'Un loco');
+(1, '1231857', 'No es facil', 'Locota', 'toto'),
+(3, '12341354', 'El princhipito', 'Moco', 'Un loco'),
+(4, '12893401294', 'La reunion del pinguno', 'Pepecomnt', 'Pororoopo');
 
 -- --------------------------------------------------------
 
@@ -67,6 +76,7 @@ CREATE TABLE `prestamo` (
   `cedula` char(8) NOT NULL,
   `id_ejemplar` int(11) NOT NULL,
   `fecha_prestamo` date NOT NULL,
+  `fecha_prevista_devolucion` date DEFAULT NULL,
   `fecha_devolucion` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -91,7 +101,7 @@ CREATE TABLE `usuario` (
 --
 ALTER TABLE `ejemplar`
   ADD PRIMARY KEY (`id_ejemplar`),
-  ADD KEY `isbn` (`isbn`);
+  ADD KEY `ejemplar_ibfk_1` (`id_libro`);
 
 --
 -- Indexes for table `libros`
@@ -122,13 +132,13 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT for table `ejemplar`
 --
 ALTER TABLE `ejemplar`
-  MODIFY `id_ejemplar` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_ejemplar` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `libros`
 --
 ALTER TABLE `libros`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `prestamo`
@@ -144,7 +154,7 @@ ALTER TABLE `prestamo`
 -- Constraints for table `ejemplar`
 --
 ALTER TABLE `ejemplar`
-  ADD CONSTRAINT `ejemplar_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `libros` (`isbn`);
+  ADD CONSTRAINT `ejemplar_ibfk_1` FOREIGN KEY (`id_libro`) REFERENCES `libros` (`id`);
 
 --
 -- Constraints for table `prestamo`
