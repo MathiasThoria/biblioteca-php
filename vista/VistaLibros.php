@@ -60,6 +60,7 @@
                             <a href="index.php?controlador=libros&accion=editar&id=<?php echo $libro['id']; ?>">Editar</a>
                             <a href="index.php?controlador=libros&accion=eliminar&id=<?php echo $libro['id']; ?>"
                                 onclick="return confirm('¿Seguro que quieres eliminar este libro?')">Eliminar</a>
+                            <a href="index.php?controlador=ejemplares&accion=listar&id_libro=<?php echo $libro['id']; ?>">Ejemplares</a>
                         <?php endif; ?>                  
                     </td>
                 </tr>

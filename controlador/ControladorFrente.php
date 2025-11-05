@@ -17,7 +17,10 @@ class ControladorFrente {
                 require_once("ControladorPrestamos.php");
                 $ctrl = new ControladorPrestamos();
                 break;
-
+            case 'ejemplares':
+                require_once("ControladorEjemplares.php");
+                $ctrl = new ControladorEjemplares();
+                break;
             case 'general':
             default:
                 include(__DIR__."/../vista/VistaMenu.php");
