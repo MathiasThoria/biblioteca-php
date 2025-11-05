@@ -44,9 +44,9 @@ class Usuario
         $this->set_names();
 
         // Insertar en tabla usuario
-        $sql1 = "INSERT INTO usuario (cedula, nombre, apellido) VALUES (?, ?, ?)";
+        $sql1 = "INSERT INTO usuario (cedula, nombre, direccion) VALUES (?, ?, ?)";
         $stmt1 = mysqli_prepare($this->dbh, $sql1);
-        mysqli_stmt_bind_param($stmt1, "sss", $datos['cedula'], $datos['nombre'], $datos['apellido']);
+        mysqli_stmt_bind_param($stmt1, "sss", $datos['cedula'], $datos['nombre'], $datos['direccion']);
         if (!mysqli_stmt_execute($stmt1)) {
             die("Error al insertar usuario: " . mysqli_stmt_error($stmt1));
         }
@@ -81,13 +81,24 @@ class Usuario
     public function delete($cedula)
     {
         $this->set_names();
-        $sql = "DELETE FROM usuario WHERE cedula = ?";
-        $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $cedula);
-        if (!mysqli_stmt_execute($stmt)) {
-            die("Error al eliminar usuario: " . mysqli_stmt_error($stmt));
+
+        // 1. Eliminar de login
+        $sqlLogin = "DELETE FROM login WHERE id_usuario = ?";
+        $stmtLogin = mysqli_prepare($this->dbh, $sqlLogin);
+        mysqli_stmt_bind_param($stmtLogin, "s", $cedula); // char(8)
+        if (!mysqli_stmt_execute($stmtLogin)) {
+            die("Error al eliminar login: " . mysqli_stmt_error($stmtLogin));
         }
-        mysqli_stmt_close($stmt);
+        mysqli_stmt_close($stmtLogin);
+
+        // 2. Eliminar de usuario
+        $sqlUsuario = "DELETE FROM usuario WHERE cedula = ?";
+        $stmtUsuario = mysqli_prepare($this->dbh, $sqlUsuario);
+        mysqli_stmt_bind_param($stmtUsuario, "s", $cedula); // char(8)
+        if (!mysqli_stmt_execute($stmtUsuario)) {
+            die("Error al eliminar usuario: " . mysqli_stmt_error($stmtUsuario));
+        }
+        mysqli_stmt_close($stmtUsuario);
     }
     // VALIDAR LOGIN - tabla login
     public function validarLogin($cedula, $password) {

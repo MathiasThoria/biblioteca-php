@@ -36,7 +36,7 @@ class ControladorUsuarios
             $datos = [
                 'cedula'  => $post['cedula'],
                 'nombre'  => $post['nombre'],
-                'apellido'=> $post['apellido'],
+                'direccion'=> $post['direccion'],
                 'contrasena' => $post['contrasena'],
                 'perfil'     => $post['perfil']
             ];
@@ -53,15 +53,17 @@ class ControladorUsuarios
     public function editar($get = [], $post = [])
     {
         $cedula = $get['cedula'] ?? null;
+        
         if (!$cedula) {
-            echo "No se especificó un usuario.";
-            return;
+            echo "No se especificó un usuario.";        
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($post)) {
             $datos = [
                 'nombre'   => $post['nombre'],
-                'apellido' => $post['apellido']
+                'direccion' => $post['direccion'],
+                'perfil'    => $post['perfil'],
+                'contrasena' => $post['contrasena']
             ];
             $this->usuarioModel->update($cedula, $datos);
             header("Location: index.php?controlador=usuarios&accion=listar");
@@ -101,7 +103,7 @@ class ControladorUsuarios
                 $_SESSION['usuario'] = [
                     'cedula'   => $usuarioDatos['cedula'],
                     'nombre'   => $usuarioDatos['nombre'],
-                    'apellido' => $usuarioDatos['apellido'],
+                    'direccion' => $usuarioDatos['direccion'],
                     'perfil'   => $loginDatos['perfil'] // desde login
                 ];
 

@@ -3,8 +3,8 @@
 
 $cedula = $usuario['cedula'] ?? '';
 $nombre = $usuario['nombre'] ?? '';
-$apellido = $usuario['apellido'] ?? '';
-$contrasena = ''; // Siempre vacío en edición
+$apellido = $usuario['direccion'] ?? '';
+$contrasena = $usuario['contrasena'] ?? '';
 $perfil = $usuario['perfil'] ?? 'usuario';
 
 $accion = isset($usuario) ? 'editar' : 'crear';
@@ -38,7 +38,7 @@ $accion = isset($usuario) ? 'editar' : 'crear';
     <input type="text" name="nombre" id="nombre" value="<?= htmlspecialchars($nombre) ?>" required>
 
     <label for="apellido">Apellido:</label>
-    <input type="text" name="apellido" id="apellido" value="<?= htmlspecialchars($apellido) ?>" required>
+    <input type="text" name="direccion" id="direccion" value="<?= htmlspecialchars($apellido) ?>" required>
 
     <label for="contrasena">Contraseña:</label>
     <input type="text" name="contrasena" id="contrasena" value="<?= htmlspecialchars($contrasena) ?>" 
