@@ -76,5 +76,17 @@ class Usuario
         }
         mysqli_stmt_close($stmt);
     }
+    // VALIDAR LOGIN - tabla login
+    public function validarLogin($cedula, $password) {
+        $this->set_names();
+        $sql = "SELECT * FROM login WHERE id_usuario = ? AND contrasena = ?";
+        $stmt = mysqli_prepare($this->dbh, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $cedula, $password);
+        mysqli_stmt_execute($stmt);
+        $resultado = mysqli_stmt_get_result($stmt);
+        $usuario = mysqli_fetch_assoc($resultado);
+        mysqli_stmt_close($stmt);
+        return $usuario ? true : false;
+    }
 }
 ?>

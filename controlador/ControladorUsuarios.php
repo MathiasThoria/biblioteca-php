@@ -80,5 +80,40 @@ class ControladorUsuarios
         header("Location: index.php?controlador=usuarios&accion=listar");
         exit;
     }
+
+    
+    // VALIDAR USUARIO
+    public function validar($get = [], $post = []){
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $cedula = $_POST['cedula'];
+            $password = $_POST['password'];           
+
+            // validar login
+            $loginDatos = $this->usuarioModel->validarLogin($cedula, $password);
+            if ($loginDatos) {
+                session_start();
+                // Obtener datos completos del usuario
+                $usuarioDatos = $this->usuarioModel->getByCedula($cedula);
+
+                // Guardar en sesión, incluyendo perfil desde login
+                $_SESSION['usuario'] = [
+                    'cedula'   => $usuarioDatos['cedula'],
+                    'nombre'   => $usuarioDatos['nombre'],
+                    'apellido' => $usuarioDatos['apellido'],
+                    'perfil'   => $loginDatos['perfil'] // desde login
+                ];
+
+                header("Location: ../vista/VistaMenu.php");
+                exit();
+            } else {
+                $error = "Cédula o contraseña incorrecta";
+                //echo "<script>alert('Cédula o contraseña incorrecta');</script>";
+                include(__DIR__ . "/../vista/VistaLogin.php");
+            }
+        } else {
+            include(__DIR__ . "/../vista/VistaLogin.php");
+        }
+    }
+
 }
 ?>

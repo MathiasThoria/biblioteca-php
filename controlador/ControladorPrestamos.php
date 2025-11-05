@@ -54,8 +54,7 @@ class ControladorPrestamos
     public function marcarDevuelto($get = [], $post = [])
     {
         $id = $get['id'] ?? null;
-/*var_dump($_SERVER['REQUEST_METHOD'], $get, $post);
-die();*/
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($post)) {
             $datos = [
                 'id_prestamo' => $post['id_prestamo'],       // oculto en el form
