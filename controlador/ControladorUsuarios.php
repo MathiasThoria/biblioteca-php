@@ -36,7 +36,9 @@ class ControladorUsuarios
             $datos = [
                 'cedula'  => $post['cedula'],
                 'nombre'  => $post['nombre'],
-                'apellido'=> $post['apellido']
+                'apellido'=> $post['apellido'],
+                'contrasena' => $post['contrasena'],
+                'perfil'     => $post['perfil']
             ];
             $this->usuarioModel->create($datos);
             header("Location: index.php?controlador=usuarios&accion=listar");
@@ -114,6 +116,15 @@ class ControladorUsuarios
             include(__DIR__ . "/../vista/VistaLogin.php");
         }
     }
+    // CERRAR SESIÓN
+    public function logout() {
+        session_start();      // iniciar sesión si no está iniciada
+        session_unset();      // limpiar variables de sesión
+        session_destroy();    // destruir la sesión
+        header("Location: index.php?controlador=usuarios&accion=validar"); // redirigir al login
+        exit();
+    }
+
 
 }
 ?>

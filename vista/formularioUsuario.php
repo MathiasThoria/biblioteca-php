@@ -1,14 +1,12 @@
 <?php
 // formularioUsuario.php
 
-// Si existen datos del usuario (modo edición), los tomamos.
-// Si no, dejamos los campos vacíos (modo alta).
 $cedula = $usuario['cedula'] ?? '';
 $nombre = $usuario['nombre'] ?? '';
 $apellido = $usuario['apellido'] ?? '';
+$contrasena = ''; // Siempre vacío en edición
+$perfil = $usuario['perfil'] ?? 'usuario';
 
-// Si estamos editando, el formulario se enviará a "editar",
-// si no, a "crear".
 $accion = isset($usuario) ? 'editar' : 'crear';
 ?>
 
@@ -18,32 +16,11 @@ $accion = isset($usuario) ? 'editar' : 'crear';
     <meta charset="UTF-8">
     <title><?= isset($usuario) ? 'Editar Usuario' : 'Agregar Usuario' ?></title>
     <style>
-        form {
-            width: 320px;
-            margin: 40px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-        input, button {
-            width: 100%;
-            padding: 6px;
-            margin-top: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            cursor: pointer;
-        }
-        a {
-            display: inline-block;
-            margin-top: 10px;
-            text-align: center;
-            width: 100%;
-        }
+        form { width: 320px; margin: 40px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        label { display: block; margin-top: 10px; }
+        input, select, button { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+        button { cursor: pointer; }
+        a { display: inline-block; margin-top: 10px; text-align: center; width: 100%; }
     </style>
 </head>
 <body>
@@ -54,7 +31,7 @@ $accion = isset($usuario) ? 'editar' : 'crear';
 
 <form action="index.php?controlador=usuarios&accion=<?= $accion ?>" method="POST">
     <label for="cedula">Cédula:</label>
-    <input type="number" name="cedula" id="cedula" value="<?= htmlspecialchars($cedula) ?>" 
+    <input type="text" name="cedula" id="cedula" value="<?= htmlspecialchars($cedula) ?>" 
            <?= isset($usuario) ? 'readonly' : 'required' ?>>
 
     <label for="nombre">Nombre:</label>
@@ -63,12 +40,23 @@ $accion = isset($usuario) ? 'editar' : 'crear';
     <label for="apellido">Apellido:</label>
     <input type="text" name="apellido" id="apellido" value="<?= htmlspecialchars($apellido) ?>" required>
 
+    <label for="contrasena">Contraseña:</label>
+    <input type="text" name="contrasena" id="contrasena" value="<?= htmlspecialchars($contrasena) ?>" 
+           <?= isset($usuario) ? '' : 'required' ?>>
+
+    <label for="perfil">Perfil:</label>
+    <select name="perfil" id="perfil">
+        <option value="usuario" <?= $perfil=='usuario' ? 'selected' : '' ?>>Usuario</option>
+        <option value="administrador" <?= $perfil=='administrador' ? 'selected' : '' ?>>Administrador</option>
+    </select>
+
     <button type="submit">
         <?= isset($usuario) ? 'Guardar Cambios' : 'Agregar Usuario' ?>
     </button>
 
     <a href="index.php?controlador=usuarios&accion=listar">Cancelar</a>
 </form>
-<a href="index.php?controlador=usuario&accion=listar">⬅ Volver a la lista</a>
+
+<a href="index.php?controlador=usuarios&accion=listar">⬅ Volver a la lista</a>
 </body>
 </html>

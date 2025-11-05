@@ -42,13 +42,26 @@ class Usuario
     public function create($datos)
     {
         $this->set_names();
-        $sql = "INSERT INTO usuario (cedula, nombre, apellido) VALUES (?, ?, ?)";
-        $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "iss", $datos['cedula'], $datos['nombre'], $datos['direccion']);
-        if (!mysqli_stmt_execute($stmt)) {
-            die("Error al insertar usuario: " . mysqli_stmt_error($stmt));
+
+        // Insertar en tabla usuario
+        $sql1 = "INSERT INTO usuario (cedula, nombre, apellido) VALUES (?, ?, ?)";
+        $stmt1 = mysqli_prepare($this->dbh, $sql1);
+        mysqli_stmt_bind_param($stmt1, "sss", $datos['cedula'], $datos['nombre'], $datos['apellido']);
+        if (!mysqli_stmt_execute($stmt1)) {
+            die("Error al insertar usuario: " . mysqli_stmt_error($stmt1));
         }
-        mysqli_stmt_close($stmt);
+        mysqli_stmt_close($stmt1);
+
+        // Insertar en tabla login
+        $perfil = $datos['perfil'] ?? 'usuario';
+        $password = $datos['contrasena'] ?? '123'; // contraseña por defecto si no se pasa
+        $sql2 = "INSERT INTO login (id_usuario, contrasena, perfil) VALUES (?, ?, ?)";
+        $stmt2 = mysqli_prepare($this->dbh, $sql2);
+        mysqli_stmt_bind_param($stmt2, "sss", $datos['cedula'], $password, $perfil);
+        if (!mysqli_stmt_execute($stmt2)) {
+            die("Error al insertar login: " . mysqli_stmt_error($stmt2));
+        }
+        mysqli_stmt_close($stmt2);
     }
 
     // EDITAR USUARIO
@@ -88,5 +101,6 @@ class Usuario
         mysqli_stmt_close($stmt);
         return $usuario ? true : false;
     }
+
 }
 ?>
