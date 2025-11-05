@@ -28,6 +28,7 @@
 
 <h2 style="text-align:center;">Gestión de Libros</h2>
 
+<a href="index.php?controlador=general">⬅ Volver al Menu</a>
 <?php if (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'administrador'): ?>
     <div style="text-align:center; margin-bottom: 20px;">
         <a href="index.php?controlador=libros&accion=crear">Agregar Libro</a>        

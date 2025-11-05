@@ -37,6 +37,22 @@ class Prestamo
         $resultado = $this->dbh->query($sql);
         return $resultado->fetch_all(MYSQLI_ASSOC);
     }
+    public function getAllConEstado(){
+        $this->set_names();
+        $sql = "SELECT 
+            p.*, 
+            u.nombre AS nombre_usuario,
+            l.titulo AS titulo_libro,
+            e.estado AS estado_ejemplar
+            FROM prestamo p
+            JOIN usuario u ON p.cedula = u.cedula
+            JOIN ejemplar e ON p.id_ejemplar = e.id_ejemplar
+            JOIN libros l ON e.id_libro = l.id";
+        $resultado = $this->dbh->query($sql);
+        return $resultado->fetch_all(MYSQLI_ASSOC);
+    }
+
+
 
     // OBTENER PRÉSTAMO POR ID
     public function getById($id)
@@ -70,19 +86,48 @@ class Prestamo
             die("Error al insertar préstamo: " . mysqli_stmt_error($stmt));
         }
         mysqli_stmt_close($stmt);
+
+        // Marcar el ejemplar como prestado
+        $sql2 = "UPDATE ejemplar 
+                SET estado = 'prestado' 
+                WHERE id_ejemplar = ?";
+        $stmt2 = mysqli_prepare($this->dbh, $sql2);
+        mysqli_stmt_bind_param($stmt2, "i", $datos['id_ejemplar']);
+
+        if (!mysqli_stmt_execute($stmt2)) {
+            die("Error al actualizar estado del ejemplar: " . mysqli_stmt_error($stmt2));
+        }
+        mysqli_stmt_close($stmt2);
     }
 
     // ACTUALIZAR DEVOLUCIÓN
-    public function marcarDevuelto($id, $fecha_devolucion)
+    public function marcarDevuelto($datos)
     {
         $this->set_names();
-        $sql = "UPDATE prestamo SET fecha_devolucion = ? WHERE id_prestamo = ?";
+
+        // Actualizar la fecha de devolución del préstamo
+        $sql = "UPDATE prestamo 
+                SET fecha_devolucion = ? 
+                WHERE id_prestamo = ?";
         $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "si", $fecha_devolucion, $id);
+        mysqli_stmt_bind_param($stmt, "si", $datos['fecha_devolucion'], $datos['id_prestamo']);
+
         if (!mysqli_stmt_execute($stmt)) {
             die("Error al actualizar devolución: " . mysqli_stmt_error($stmt));
         }
         mysqli_stmt_close($stmt);
+
+        // Marcar el ejemplar como disponible
+        $sql2 = "UPDATE ejemplar 
+                SET estado = 'disponible' 
+                WHERE id_ejemplar = ?";
+        $stmt2 = mysqli_prepare($this->dbh, $sql2);
+        mysqli_stmt_bind_param($stmt2, "i", $datos['id_ejemplar']);
+
+        if (!mysqli_stmt_execute($stmt2)) {
+            die("Error al actualizar estado del ejemplar: " . mysqli_stmt_error($stmt2));
+        }
+        mysqli_stmt_close($stmt2);
     }
 
     // ELIMINAR PRÉSTAMO
@@ -112,5 +157,25 @@ class Prestamo
         return $resultado->fetch_all(MYSQLI_ASSOC);
     }
 
+    public function getPendientesConEstado()
+    {
+        $this->set_names();
+        $sql = "SELECT 
+                    p.*, 
+                    u.nombre AS nombre_usuario, 
+                    u.apellido AS apellido_usuario, 
+                    e.id_libro,
+                    e.estado AS estado_ejemplar,
+                    l.titulo AS titulo_libro
+                FROM prestamo p
+                JOIN usuario u ON p.cedula = u.cedula
+                JOIN ejemplar e ON p.id_ejemplar = e.id_ejemplar
+                JOIN libros l ON e.id_libro = l.id
+                WHERE p.fecha_devolucion IS NULL
+                ORDER BY p.fecha_prevista_devolucion ASC";
+
+        $resultado = $this->dbh->query($sql);
+        return $resultado->fetch_all(MYSQLI_ASSOC);
+    }
 }
 ?>

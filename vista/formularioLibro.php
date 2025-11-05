@@ -68,6 +68,6 @@ $accion = $id ? 'editar&id=' . $id : 'crear';
         <a href="index.php?controlador=libros&accion=listar">Cancelar</a>
     </div>
 </form>
-
+<a href="index.php?controlador=libros&accion=listar">⬅ Volver a la lista</a>
 </body>
 </html>

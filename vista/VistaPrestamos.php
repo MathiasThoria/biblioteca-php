@@ -41,7 +41,7 @@ $filtro_estado = $filtro_estado ?? 'todos';
 <body>
 
 <h2 style="text-align:center;">Gestión de Préstamos</h2>
-
+<a href="index.php?controlador=general">⬅ Volver al Menu</a>
 <!-- Filtro de préstamos -->
 <form action="index.php" method="GET">
     <input type="hidden" name="controlador" value="prestamos">
@@ -55,15 +55,18 @@ $filtro_estado = $filtro_estado ?? 'todos';
     <button type="submit">Aplicar</button>
 </form>
 
+<!-- Botón para nuevo préstamo -->
+<a href="index.php?controlador=prestamos&accion=crear">
+    Ingresar Préstamo
+</a>
 <table>
     <tr>
-        <th>Usuario</th>
+        <th>Usuario (CI)</th>
         <th>Ejemplar (ID)</th>
-        <th>Libro</th>
         <th>Fecha Préstamo</th>
         <th>Fecha Prevista Devolución</th>
         <th>Fecha Devolución</th>
-        <th>Estado</th>
+        <th>Estado (Ejemplar)</th>
         <th>Acciones</th>
     </tr>
 
@@ -75,28 +78,27 @@ $filtro_estado = $filtro_estado ?? 'todos';
             $fecha_prevista = new DateTime($p['fecha_prevista_devolucion']);
             $fecha_devuelto = !empty($p['fecha_devolucion']) ? new DateTime($p['fecha_devolucion']) : null;
 
-            if ($fecha_devuelto) {
-                $estado_text = "Devuelto";
-                $estado_class = "devuelto";
-            } elseif ($fecha_prevista < $hoy) {
-                $estado_text = "Vencido";
-                $estado_class = "vencido";
-            } else {
-                $estado_text = "Pendiente";
-                $estado_class = "pendiente";
+            if ($p['estado_ejemplar'] === 'disponible') {
+                $estado = 'Devuelto';
+            } 
+            if($fecha_prevista < $hoy && $p['estado_ejemplar'] === 'prestado') {
+                $estado = 'Vencido';
+            }
+            if($fecha_prevista >= $hoy && $p['estado_ejemplar'] === 'prestado'){
+                $estado = 'Pendiente';
             }
             ?>
             <tr>
-                <td><?= htmlspecialchars($p['nombre_usuario']) ?></td>
-                <td><?= $p['id_ejemplar'] ?></td>
-                <td><?= htmlspecialchars($p['titulo_libro']) ?></td>
+                <td><?= htmlspecialchars($p['cedula']) ?></td>
+                <td><?= $p['id_ejemplar'] ?></td>                
                 <td><?= $p['fecha_prestamo'] ?></td>
                 <td><?= $p['fecha_prevista_devolucion'] ?></td>
                 <td><?= $p['fecha_devolucion'] ?? '-' ?></td>
-                <td class="<?= $estado_class ?>"><?= $estado_text ?></td>
+                <td class="<?= $p['estado_ejemplar'] ?>">
+                <?= $estado ?></td>
                 <td>
-                    <?php if (!$fecha_devuelto): ?>
-                        <a href="index.php?controlador=prestamos&accion=marcarDevuelto&id=<?= $p['id_prestamo'] ?>">Marcar Devuelto</a>
+                    <?php if ($estado == 'Pendiente' || $estado == 'Vencido'): ?>
+                        <a href="index.php?controlador=prestamos&accion=marcarDevuelto&id=<?= $p['id_prestamo'] ?>">Devolver</a>
                     <?php endif; ?>
                     &nbsp;|&nbsp;
                     <a href="index.php?controlador=prestamos&accion=eliminar&id=<?= $p['id_prestamo'] ?>"

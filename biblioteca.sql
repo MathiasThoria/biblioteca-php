@@ -33,14 +33,7 @@ CREATE TABLE `ejemplar` (
   `id_libro` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `ejemplar`
---
 
-INSERT INTO `ejemplar` (`id_ejemplar`, `estado`, `id_libro`) VALUES
-(1, 'disponible', 1),
-(6, 'disponible', 1),
-(7, 'disponible', 1);
 
 -- --------------------------------------------------------
 
@@ -60,10 +53,6 @@ CREATE TABLE `libros` (
 -- Dumping data for table `libros`
 --
 
-INSERT INTO `libros` (`id`, `isbn`, `titulo`, `editorial`, `autor`) VALUES
-(1, '1231857', 'No es facil', 'Locota', 'toto'),
-(3, '12341354', 'El princhipito', 'Moco', 'Un loco'),
-(4, '12893401294', 'La reunion del pinguno', 'Pepecomnt', 'Pororoopo');
 
 -- --------------------------------------------------------
 

@@ -44,7 +44,7 @@ class Usuario
         $this->set_names();
         $sql = "INSERT INTO usuario (cedula, nombre, apellido) VALUES (?, ?, ?)";
         $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "iss", $datos['cedula'], $datos['nombre'], $datos['apellido']);
+        mysqli_stmt_bind_param($stmt, "iss", $datos['cedula'], $datos['nombre'], $datos['direccion']);
         if (!mysqli_stmt_execute($stmt)) {
             die("Error al insertar usuario: " . mysqli_stmt_error($stmt));
         }
@@ -55,9 +55,9 @@ class Usuario
     public function update($cedula, $datos)
     {
         $this->set_names();
-        $sql = "UPDATE usuario SET nombre = ?, apellido = ? WHERE cedula = ?";
+        $sql = "UPDATE usuario SET nombre = ?, direccion = ? WHERE cedula = ?";
         $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "ssi", $datos['nombre'], $datos['apellido'], $cedula);
+        mysqli_stmt_bind_param($stmt, "ssi", $datos['nombre'], $datos['direccion'], $cedula);
         if (!mysqli_stmt_execute($stmt)) {
             die("Error al actualizar usuario: " . mysqli_stmt_error($stmt));
         }

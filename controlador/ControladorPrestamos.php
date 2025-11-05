@@ -22,9 +22,9 @@ class ControladorPrestamos
         $soloPendientes = $get['pendientes'] ?? false;
 
         if ($soloPendientes) {
-            $prestamos = $this->prestamoModel->getPendientes();
+            $prestamos = $this->prestamoModel->getPendientesConEstado();
         } else {
-            $prestamos = $this->prestamoModel->getAll();
+            $prestamos = $this->prestamoModel->getAllConEstado();
         }
 
         include(__DIR__ . "/../vista/VistaPrestamos.php");
@@ -45,23 +45,28 @@ class ControladorPrestamos
             exit;
         } else {
             $usuarios = $this->usuarioModel->getAll();
-            $ejemplares = $this->ejemplarModel->getDisponibles();
+            //$ejemplares = $this->ejemplarModel->getDisponibles();
             include(__DIR__ . "/../vista/formularioPrestamo.php");
         }
     }
 
     // DEVOLVER/EDITAR PRÉSTAMO
-    public function devolver($get = [], $post = [])
+    public function marcarDevuelto($get = [], $post = [])
     {
         $id = $get['id'] ?? null;
+/*var_dump($_SERVER['REQUEST_METHOD'], $get, $post);
+die();*/
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($post)) {
             $datos = [
+                'id_prestamo' => $post['id_prestamo'],       // oculto en el form
+                'id_ejemplar' => $post['id_ejemplar'],       // oculto también
                 'fecha_devolucion' => $post['fecha_devolucion']
             ];
-            $this->prestamoModel->update($id, $datos);
+            $this->prestamoModel->marcarDevuelto($datos);
             header("Location: index.php?controlador=prestamos&accion=listar");
             exit;
         } else {
+            // cuando entra por GET (mostrar formulario)
             $prestamo = $this->prestamoModel->getById($id);
             include(__DIR__ . "/../vista/formularioDevolucion.php");
         }

@@ -49,14 +49,14 @@
 <body>
 
 <h2 style="text-align:center;">Usuarios</h2>
-
+<a href="index.php?controlador=general">⬅ Volver al Menu</a>
 <a href="index.php?controlador=usuarios&accion=crear" class="btn-agregar">Agregar Usuario</a>
 
 <table>
     <tr>
         <th>Cédula</th>
         <th>Nombre</th>
-        <th>Apellido</th>
+        <th>Direccion</th>
         <th>Acciones</th>
     </tr>
 
@@ -65,7 +65,7 @@
             <tr>
                 <td><?= htmlspecialchars($u['cedula']) ?></td>
                 <td><?= htmlspecialchars($u['nombre']) ?></td>
-                <td><?= htmlspecialchars($u['apellido']) ?></td>
+                <td><?= htmlspecialchars($u['direccion']) ?></td>
                 <td>
                     <a href="index.php?controlador=usuarios&accion=ver&cedula=<?= $u['cedula'] ?>">Ver</a> |
                     <a href="index.php?controlador=usuarios&accion=editar&cedula=<?= $u['cedula'] ?>">Editar</a> |

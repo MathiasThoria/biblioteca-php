@@ -52,6 +52,6 @@ $accion   = isset($ejemplar) ? "editar&id_ejemplar=" . $ejemplar['id_ejemplar'] 
     <button type="submit"><?php echo isset($ejemplar) ? "Actualizar" : "Agregar"; ?></button>
     <a href="index.php?controlador=ejemplares&accion=listar&id_libro=<?php echo $id_libro; ?>">Cancelar</a>
 </form>
-
+<a href="index.php?controlador=ejemplares&accion=listar">⬅ Volver a la lista</a>
 </body>
 </html>
