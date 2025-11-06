@@ -100,8 +100,7 @@ $filtro_estado = $filtro_estado ?? 'todos';
                 <td>
                     <?php if ($estado == 'Pendiente' || $estado == 'Vencido'): ?>
                         <a href="index.php?controlador=prestamos&accion=marcarDevuelto&id=<?= $p['id_prestamo'] ?>">Devolver</a>
-                    <?php endif; ?>
-                    &nbsp;|&nbsp;
+                    <?php endif; ?>                    
                     <a href="index.php?controlador=prestamos&accion=eliminar&id=<?= $p['id_prestamo'] ?>"
                        onclick="return confirm('¿Seguro que querés eliminar este préstamo?');">Eliminar</a>
                 </td>

@@ -66,8 +66,7 @@
                 <td><?= htmlspecialchars($u['cedula']) ?></td>
                 <td><?= htmlspecialchars($u['nombre']) ?></td>
                 <td><?= htmlspecialchars($u['direccion']) ?></td>
-                <td>
-                    <a href="index.php?controlador=usuarios&accion=ver&cedula=<?= $u['cedula'] ?>">Ver</a> |
+                <td>                    
                     <a href="index.php?controlador=usuarios&accion=editar&cedula=<?= $u['cedula'] ?>">Editar</a> |
                     <a href="index.php?controlador=usuarios&accion=eliminar&cedula=<?= $u['cedula'] ?>"
                        onclick="return confirm('¿Seguro que querés eliminar este usuario?');">Eliminar</a>
