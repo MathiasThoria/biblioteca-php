@@ -55,8 +55,7 @@
                     <td><?php echo $libro['titulo']; ?></td>
                     <td><?php echo $libro['autor']; ?></td>                    
                     <td><?php echo $libro['editorial']; ?></td>
-                    <td>
-                        <a href="index.php?controlador=libros&accion=ver&id=<?php echo $libro['id']; ?>">Ver</a>     
+                    <td>                            
                         <?php if (isset($_SESSION['usuario']['perfil']) && $_SESSION['usuario']['perfil'] === 'administrador'): ?>
                             <a href="index.php?controlador=libros&accion=editar&id=<?php echo $libro['id']; ?>">Editar</a>
                             <a href="index.php?controlador=libros&accion=eliminar&id=<?php echo $libro['id']; ?>"

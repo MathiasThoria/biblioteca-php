@@ -38,6 +38,23 @@ class Usuario
         return $usuario;
     }
 
+    // OBTENER USUARIO POR CÉDULA CON DATOS DE LOGIN
+    public function getByCedulaConLogin($cedula)
+    {
+        $this->set_names();
+        $sql = "SELECT u.*, l.perfil, l.contrasena
+                FROM usuario u
+                LEFT JOIN login l ON u.cedula = l.id_usuario
+                WHERE u.cedula = ?";
+        $stmt = mysqli_prepare($this->dbh, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $cedula);
+        mysqli_stmt_execute($stmt);
+        $resultado = mysqli_stmt_get_result($stmt);
+        $usuario = mysqli_fetch_assoc($resultado);
+        mysqli_stmt_close($stmt);
+        return $usuario;
+    }
+
     // CREAR USUARIO
     public function create($datos)
     {

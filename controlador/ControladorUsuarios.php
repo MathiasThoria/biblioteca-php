@@ -69,7 +69,7 @@ class ControladorUsuarios
             header("Location: index.php?controlador=usuarios&accion=listar");
             exit;
         } else {
-            $usuario = $this->usuarioModel->getByCedula($cedula);
+            $usuario = $this->usuarioModel->getByCedulaConLogin($cedula);
             include(__DIR__ . "/../vista/formularioUsuario.php");
         }
     }

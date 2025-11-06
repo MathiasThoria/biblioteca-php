@@ -7,7 +7,8 @@
     </p>
 <?php endif; ?>
 <a href="index.php?controlador=prestamos&accion=listar">⬅ Volver a la lista Prestamos</a>
-<a href="index.php?controlador=general">⬅ Volver al Menu</a>
+<a href="index.php?controlador=libros&accion=listar"><br>⬅ Volver a la lista Libros</a>
+<a href="index.php?controlador=general"><br>⬅ Volver al Menu</a>
 <div style="text-align:center; margin-bottom: 15px;">
     <a href="index.php?controlador=ejemplares&accion=crear&id_libro=<?php echo $libro['id']; ?>">
         Agregar Ejemplar

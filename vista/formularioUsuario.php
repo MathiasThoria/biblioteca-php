@@ -41,6 +41,7 @@ $accion = isset($usuario) ? 'editar' : 'crear';
     <input type="text" name="direccion" id="direccion" value="<?= htmlspecialchars($apellido) ?>" required>
 
     <label for="contrasena">Contraseña:</label>
+    
     <input type="text" name="contrasena" id="contrasena" value="<?= htmlspecialchars($contrasena) ?>" 
            <?= isset($usuario) ? '' : 'required' ?>>
 
