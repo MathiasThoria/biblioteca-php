@@ -1,9 +1,8 @@
 <?php
 // VistaPrestamos.php
 
-// $prestamos viene del controlador
-// $filtro_estado viene del controlador o $_GET
-$filtro_estado = $filtro_estado ?? 'todos';
+$filtro_estado = $_GET['filtro_estado'] ?? 'todos';
+
 ?>
 
 <!DOCTYPE html>
@@ -42,6 +41,7 @@ $filtro_estado = $filtro_estado ?? 'todos';
 
 <h2 style="text-align:center;">Gestión de Préstamos</h2>
 <a href="index.php?controlador=general">⬅ Volver al Menu</a>
+
 <!-- Filtro de préstamos -->
 <form action="index.php" method="GET">
     <input type="hidden" name="controlador" value="prestamos">
@@ -49,8 +49,8 @@ $filtro_estado = $filtro_estado ?? 'todos';
 
     <label>Mostrar:</label>
     <select name="filtro_estado">
-        <option value="todos" <?= ($filtro_estado=='todos') ? 'selected' : '' ?>>Todos</option>
-        <option value="pendientes" <?= ($filtro_estado=='pendientes') ? 'selected' : '' ?>>Pendientes</option>
+        <option value="todos" <?= ($filtro_estado == 'todos') ? 'selected' : '' ?>>Todos</option>
+        <option value="Pendiente" <?= ($filtro_estado == 'Pendiente') ? 'selected' : '' ?>>Pendientes</option>
     </select>
     <button type="submit">Aplicar</button>
 </form>
@@ -79,15 +79,16 @@ $filtro_estado = $filtro_estado ?? 'todos';
             $fecha_devuelto = !empty($p['fecha_devolucion']) ? new DateTime($p['fecha_devolucion']) : null;
 
             if (isset($fecha_devuelto)) {
-                $estado = 'Devuelto';
+                $estadoMostrar = 'Devuelto';
             }else{
                 if($fecha_prevista < $hoy) {
-                    $estado = 'Vencido';
+                    $estadoMostrar = 'Vencido';
                 }
                 if($fecha_prevista >= $hoy){
-                    $estado = 'Pendiente';
+                    $estadoMostrar = 'Pendiente';
                 }
             }
+            if($filtro_estado == 'todos' || $filtro_estado == $estadoMostrar):
             ?>
             <tr>
                 <td><?= htmlspecialchars($p['cedula']) ?></td>
@@ -96,15 +97,16 @@ $filtro_estado = $filtro_estado ?? 'todos';
                 <td><?= $p['fecha_prevista_devolucion'] ?></td>
                 <td><?= $p['fecha_devolucion'] ?? '-' ?></td>
                 <td class="<?= $p['estado_ejemplar'] ?>">
-                <?= $estado ?></td>
+                <?= $estadoMostrar ?></td>
                 <td>
-                    <?php if ($estado == 'Pendiente' || $estado == 'Vencido'): ?>
+                    <?php if ($estadoMostrar == 'Pendiente' || $estadoMostrar == 'Vencido'): ?>
                         <a href="index.php?controlador=prestamos&accion=marcarDevuelto&id=<?= $p['id_prestamo'] ?>">Devolver</a>
                     <?php endif; ?>                    
                     <a href="index.php?controlador=prestamos&accion=eliminar&id=<?= $p['id_prestamo'] ?>"
                        onclick="return confirm('¿Seguro que querés eliminar este préstamo?');">Eliminar</a>
                 </td>
             </tr>
+            <?php endif; ?>
         <?php endforeach; ?>
     <?php else: ?>
         <tr><td colspan="8">No hay préstamos para mostrar.</td></tr>
