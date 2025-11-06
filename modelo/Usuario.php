@@ -112,6 +112,18 @@ class Usuario
         mysqli_stmt_close($stmt);
         return $usuario ? true : false;
     }
+    // OBTENER PERFIL DE USUARIO - tabla login
+    public function obtenerPerfil($cedula) {
+        $this->set_names();
+        $sql = "SELECT perfil FROM login WHERE id_usuario = ?";
+        $stmt = mysqli_prepare($this->dbh, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $cedula);
+        mysqli_stmt_execute($stmt);
+        $resultado = mysqli_stmt_get_result($stmt);
+        $usuario = mysqli_fetch_assoc($resultado);
+        mysqli_stmt_close($stmt);
+        return $usuario ? $usuario['perfil'] : null;
+    }
 
 }
 ?>

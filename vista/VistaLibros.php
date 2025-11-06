@@ -29,7 +29,7 @@
 <h2 style="text-align:center;">Gestión de Libros</h2>
 
 <a href="index.php?controlador=general">⬅ Volver al Menu</a>
-<?php if (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'administrador'): ?>
+<?php if (isset($_SESSION['usuario']['perfil']) && $_SESSION['usuario']['perfil'] === 'administrador'): ?>
     <div style="text-align:center; margin-bottom: 20px;">
         <a href="index.php?controlador=libros&accion=crear">Agregar Libro</a>        
     </div>
@@ -57,7 +57,7 @@
                     <td><?php echo $libro['editorial']; ?></td>
                     <td>
                         <a href="index.php?controlador=libros&accion=ver&id=<?php echo $libro['id']; ?>">Ver</a>     
-                        <?php if (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'administrador'): ?>
+                        <?php if (isset($_SESSION['usuario']['perfil']) && $_SESSION['usuario']['perfil'] === 'administrador'): ?>
                             <a href="index.php?controlador=libros&accion=editar&id=<?php echo $libro['id']; ?>">Editar</a>
                             <a href="index.php?controlador=libros&accion=eliminar&id=<?php echo $libro['id']; ?>"
                                 onclick="return confirm('¿Seguro que quieres eliminar este libro?')">Eliminar</a>

@@ -104,9 +104,9 @@ class ControladorUsuarios
                     'cedula'   => $usuarioDatos['cedula'],
                     'nombre'   => $usuarioDatos['nombre'],
                     'direccion' => $usuarioDatos['direccion'],
-                    'perfil'   => $loginDatos['perfil'] // desde login
+                    'perfil'   => $this->usuarioModel->obtenerPerfil($cedula)
                 ];
-
+                
                 header("Location: ../vista/VistaMenu.php");
                 exit();
             } else {
