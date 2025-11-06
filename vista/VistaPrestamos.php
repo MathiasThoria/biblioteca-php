@@ -66,7 +66,7 @@ $filtro_estado = $filtro_estado ?? 'todos';
         <th>Fecha Préstamo</th>
         <th>Fecha Prevista Devolución</th>
         <th>Fecha Devolución</th>
-        <th>Estado (Ejemplar)</th>
+        <th>Estado Préstamo</th>
         <th>Acciones</th>
     </tr>
 
@@ -78,14 +78,15 @@ $filtro_estado = $filtro_estado ?? 'todos';
             $fecha_prevista = new DateTime($p['fecha_prevista_devolucion']);
             $fecha_devuelto = !empty($p['fecha_devolucion']) ? new DateTime($p['fecha_devolucion']) : null;
 
-            if ($p['estado_ejemplar'] === 'disponible') {
+            if (isset($fecha_devuelto)) {
                 $estado = 'Devuelto';
-            } 
-            if($fecha_prevista < $hoy && $p['estado_ejemplar'] === 'prestado') {
-                $estado = 'Vencido';
-            }
-            if($fecha_prevista >= $hoy && $p['estado_ejemplar'] === 'prestado'){
-                $estado = 'Pendiente';
+            }else{
+                if($fecha_prevista < $hoy) {
+                    $estado = 'Vencido';
+                }
+                if($fecha_prevista >= $hoy){
+                    $estado = 'Pendiente';
+                }
             }
             ?>
             <tr>
