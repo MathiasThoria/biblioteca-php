@@ -107,7 +107,7 @@ class ControladorUsuarios
                     'perfil'   => $this->usuarioModel->obtenerPerfil($cedula)
                 ];
                 
-                header("Location: ../vista/VistaMenu.php");
+                header("Location: /../vista/VistaMenu.php");
                 exit();
             } else {
                 $error = "Cédula o contraseña incorrecta";
