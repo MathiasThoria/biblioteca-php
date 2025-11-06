@@ -51,6 +51,15 @@
 </head>
 <body>
 
+<!--  si hay mensaje de error, mostrarlo -->
+<?php if (!empty($errorMensaje)): ?>
+<script>
+    alert("<?= $errorMensaje ?>");
+</script>
+<?php endif; ?>
+
+
+<!-- formulario de nuevo préstamo -->
 <h2>Registrar nuevo préstamo</h2>
 
 <form action="index.php?controlador=prestamos&accion=crear" method="POST">

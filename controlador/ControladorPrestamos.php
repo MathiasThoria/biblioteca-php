@@ -40,15 +40,22 @@ class ControladorPrestamos
                 'fecha_prestamo' => $post['fecha_prestamo'],
                 'fecha_prevista_devolucion' => $post['fecha_prevista_devolucion']
             ];
-            $this->prestamoModel->create($datos);
-            header("Location: index.php?controlador=prestamos&accion=listar");
-            exit;
+            $resultado = $this->prestamoModel->create($datos);
+
+            if (!empty($resultado['error'])) {
+                $errorMensaje = $resultado['mensaje'];
+                $usuarios = $this->usuarioModel->getAll();
+                include(__DIR__ . "/../vista/formularioPrestamo.php");
+            } else {
+                header("Location: index.php?controlador=prestamos&accion=listar");
+                exit;
+            }
         } else {
             $usuarios = $this->usuarioModel->getAll();
-            //$ejemplares = $this->ejemplarModel->getDisponibles();
             include(__DIR__ . "/../vista/formularioPrestamo.php");
         }
     }
+
 
     // DEVOLVER/EDITAR PRÉSTAMO
     public function marcarDevuelto($get = [], $post = [])
