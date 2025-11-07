@@ -123,47 +123,17 @@ class Usuario
         return $usuario;
     }
 
-    // OBTENER USUARIO POR CÉDULA CON DATOS DE LOGIN
-    public function getByCedulaConLogin($cedula)
-    {
-        $this->set_names();
-        $sql = "SELECT u.*, l.perfil, l.contrasena
-                FROM usuario u
-                LEFT JOIN login l ON u.cedula = l.id_usuario
-                WHERE u.cedula = ?";
-        $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $cedula);
-        mysqli_stmt_execute($stmt);
-        $resultado = mysqli_stmt_get_result($stmt);
-        $usuario = mysqli_fetch_assoc($resultado);
-        mysqli_stmt_close($stmt);
-        return $usuario;
-    }
-
     // CREAR USUARIO
     public function create($datos)
     {
         $this->set_names();
-
-        // Insertar en tabla usuario
-        $sql1 = "INSERT INTO usuario (cedula, nombre, direccion) VALUES (?, ?, ?)";
-        $stmt1 = mysqli_prepare($this->dbh, $sql1);
-        mysqli_stmt_bind_param($stmt1, "sss", $datos['cedula'], $datos['nombre'], $datos['direccion']);
-        if (!mysqli_stmt_execute($stmt1)) {
-            die("Error al insertar usuario: " . mysqli_stmt_error($stmt1));
+        $sql = "INSERT INTO usuario (cedula, nombre, apellido) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($this->dbh, $sql);
+        mysqli_stmt_bind_param($stmt, "iss", $datos['cedula'], $datos['nombre'], $datos['direccion']);
+        if (!mysqli_stmt_execute($stmt)) {
+            die("Error al insertar usuario: " . mysqli_stmt_error($stmt));
         }
-        mysqli_stmt_close($stmt1);
-
-        // Insertar en tabla login
-        $perfil = $datos['perfil'] ?? 'usuario';
-        $password = $datos['contrasena'] ?? '123'; // contraseña por defecto si no se pasa
-        $sql2 = "INSERT INTO login (id_usuario, contrasena, perfil) VALUES (?, ?, ?)";
-        $stmt2 = mysqli_prepare($this->dbh, $sql2);
-        mysqli_stmt_bind_param($stmt2, "sss", $datos['cedula'], $password, $perfil);
-        if (!mysqli_stmt_execute($stmt2)) {
-            die("Error al insertar login: " . mysqli_stmt_error($stmt2));
-        }
-        mysqli_stmt_close($stmt2);
+        mysqli_stmt_close($stmt);
     }
 
     // EDITAR USUARIO
@@ -183,50 +153,14 @@ class Usuario
     public function delete($cedula)
     {
         $this->set_names();
-
-        // 1. Eliminar de login
-        $sqlLogin = "DELETE FROM login WHERE id_usuario = ?";
-        $stmtLogin = mysqli_prepare($this->dbh, $sqlLogin);
-        mysqli_stmt_bind_param($stmtLogin, "s", $cedula); // char(8)
-        if (!mysqli_stmt_execute($stmtLogin)) {
-            die("Error al eliminar login: " . mysqli_stmt_error($stmtLogin));
-        }
-        mysqli_stmt_close($stmtLogin);
-
-        // 2. Eliminar de usuario
-        $sqlUsuario = "DELETE FROM usuario WHERE cedula = ?";
-        $stmtUsuario = mysqli_prepare($this->dbh, $sqlUsuario);
-        mysqli_stmt_bind_param($stmtUsuario, "s", $cedula); // char(8)
-        if (!mysqli_stmt_execute($stmtUsuario)) {
-            die("Error al eliminar usuario: " . mysqli_stmt_error($stmtUsuario));
-        }
-        mysqli_stmt_close($stmtUsuario);
-    }
-    // VALIDAR LOGIN - tabla login
-    public function validarLogin($cedula, $password) {
-        $this->set_names();
-        $sql = "SELECT * FROM login WHERE id_usuario = ? AND contrasena = ?";
+        $sql = "DELETE FROM usuario WHERE cedula = ?";
         $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "ss", $cedula, $password);
-        mysqli_stmt_execute($stmt);
-        $resultado = mysqli_stmt_get_result($stmt);
-        $usuario = mysqli_fetch_assoc($resultado);
+        mysqli_stmt_bind_param($stmt, "i", $cedula);
+        if (!mysqli_stmt_execute($stmt)) {
+            die("Error al eliminar usuario: " . mysqli_stmt_error($stmt));
+        }
         mysqli_stmt_close($stmt);
-        return $usuario ? true : false;
     }
-    // OBTENER PERFIL DE USUARIO - tabla login
-    public function obtenerPerfil($cedula) {
-        $this->set_names();
-        $sql = "SELECT perfil FROM login WHERE id_usuario = ?";
-        $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "s", $cedula);
-        mysqli_stmt_execute($stmt);
-        $resultado = mysqli_stmt_get_result($stmt);
-        $usuario = mysqli_fetch_assoc($resultado);
-        mysqli_stmt_close($stmt);
-        return $usuario ? $usuario['perfil'] : null;
-    }
-
 }
 ?>
 <?php
@@ -329,28 +263,8 @@ class Prestamo
     public function create($datos)
     {
         $this->set_names();
-        
-        // Consultar si ejemplar disponible
-        
-        $sqlCheck = "SELECT estado FROM ejemplar WHERE id_ejemplar = ?";
-        $stmtCheck = mysqli_prepare($this->dbh, $sqlCheck);
-        mysqli_stmt_bind_param($stmtCheck, "i", $datos['id_ejemplar']);
-        mysqli_stmt_execute($stmtCheck);
-        $resultado = mysqli_stmt_get_result($stmtCheck);
-        $ejemplar = mysqli_fetch_assoc($resultado);
-        mysqli_stmt_close($stmtCheck);
-
-        if (!$ejemplar) {
-            return ["error" => true, "mensaje" => "El ejemplar no existe"];
-        }
-
-        if ($ejemplar['estado'] !== 'disponible') {
-            return ["error" => true, "mensaje" => "El ejemplar no está disponible"];
-        }       
-        
-        
-        $sql1 = "INSERT INTO prestamo (cedula, id_ejemplar, fecha_prestamo, fecha_prevista_devolucion) VALUES (?, ?, ?, ?)";
-        $stmt = mysqli_prepare($this->dbh, $sql1);
+        $sql = "INSERT INTO prestamo (cedula, id_ejemplar, fecha_prestamo, fecha_prevista_devolucion) VALUES (?, ?, ?, ?)";
+        $stmt = mysqli_prepare($this->dbh, $sql);
         mysqli_stmt_bind_param(
             $stmt,
             "iiss",
@@ -383,10 +297,10 @@ class Prestamo
         $this->set_names();
 
         // Actualizar la fecha de devolución del préstamo
-        $sql1 = "UPDATE prestamo 
+        $sql = "UPDATE prestamo 
                 SET fecha_devolucion = ? 
                 WHERE id_prestamo = ?";
-        $stmt = mysqli_prepare($this->dbh, $sql1);
+        $stmt = mysqli_prepare($this->dbh, $sql);
         mysqli_stmt_bind_param($stmt, "si", $datos['fecha_devolucion'], $datos['id_prestamo']);
 
         if (!mysqli_stmt_execute($stmt)) {
@@ -687,9 +601,7 @@ class ControladorUsuarios
             $datos = [
                 'cedula'  => $post['cedula'],
                 'nombre'  => $post['nombre'],
-                'direccion'=> $post['direccion'],
-                'contrasena' => $post['contrasena'],
-                'perfil'     => $post['perfil']
+                'apellido'=> $post['apellido']
             ];
             $this->usuarioModel->create($datos);
             header("Location: index.php?controlador=usuarios&accion=listar");
@@ -704,23 +616,21 @@ class ControladorUsuarios
     public function editar($get = [], $post = [])
     {
         $cedula = $get['cedula'] ?? null;
-        
         if (!$cedula) {
-            echo "No se especificó un usuario.";        
+            echo "No se especificó un usuario.";
+            return;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($post)) {
             $datos = [
                 'nombre'   => $post['nombre'],
-                'direccion' => $post['direccion'],
-                'perfil'    => $post['perfil'],
-                'contrasena' => $post['contrasena']
+                'apellido' => $post['apellido']
             ];
             $this->usuarioModel->update($cedula, $datos);
             header("Location: index.php?controlador=usuarios&accion=listar");
             exit;
         } else {
-            $usuario = $this->usuarioModel->getByCedulaConLogin($cedula);
+            $usuario = $this->usuarioModel->getByCedula($cedula);
             include(__DIR__ . "/../vista/formularioUsuario.php");
         }
     }
@@ -735,50 +645,6 @@ class ControladorUsuarios
         header("Location: index.php?controlador=usuarios&accion=listar");
         exit;
     }
-
-    
-    // VALIDAR USUARIO
-    public function validar($get = [], $post = []){
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $cedula = $_POST['cedula'];
-            $password = $_POST['password'];           
-
-            // validar login
-            $loginDatos = $this->usuarioModel->validarLogin($cedula, $password);
-            if ($loginDatos) {
-                session_start();
-                // Obtener datos completos del usuario
-                $usuarioDatos = $this->usuarioModel->getByCedula($cedula);
-
-                // Guardar en sesión, incluyendo perfil desde login
-                $_SESSION['usuario'] = [
-                    'cedula'   => $usuarioDatos['cedula'],
-                    'nombre'   => $usuarioDatos['nombre'],
-                    'direccion' => $usuarioDatos['direccion'],
-                    'perfil'   => $this->usuarioModel->obtenerPerfil($cedula)
-                ];
-                
-                header("Location: /../vista/VistaMenu.php");
-                exit();
-            } else {
-                $error = "Cédula o contraseña incorrecta";
-                //echo "<script>alert('Cédula o contraseña incorrecta');</script>";
-                include(__DIR__ . "/../vista/VistaLogin.php");
-            }
-        } else {
-            include(__DIR__ . "/../vista/VistaLogin.php");
-        }
-    }
-    // CERRAR SESIÓN
-    public function logout() {
-        session_start();      // iniciar sesión si no está iniciada
-        session_unset();      // limpiar variables de sesión
-        session_destroy();    // destruir la sesión
-        header("Location: index.php?controlador=usuarios&accion=validar"); // redirigir al login
-        exit();
-    }
-
-
 }
 ?>
 <?php
@@ -823,28 +689,22 @@ class ControladorPrestamos
                 'fecha_prestamo' => $post['fecha_prestamo'],
                 'fecha_prevista_devolucion' => $post['fecha_prevista_devolucion']
             ];
-            $resultado = $this->prestamoModel->create($datos);
-
-            if (!empty($resultado['error'])) {
-                $errorMensaje = $resultado['mensaje'];
-                $usuarios = $this->usuarioModel->getAll();
-                include(__DIR__ . "/../vista/formularioPrestamo.php");
-            } else {
-                header("Location: index.php?controlador=prestamos&accion=listar");
-                exit;
-            }
+            $this->prestamoModel->create($datos);
+            header("Location: index.php?controlador=prestamos&accion=listar");
+            exit;
         } else {
             $usuarios = $this->usuarioModel->getAll();
+            //$ejemplares = $this->ejemplarModel->getDisponibles();
             include(__DIR__ . "/../vista/formularioPrestamo.php");
         }
     }
-
 
     // DEVOLVER/EDITAR PRÉSTAMO
     public function marcarDevuelto($get = [], $post = [])
     {
         $id = $get['id'] ?? null;
-
+/*var_dump($_SERVER['REQUEST_METHOD'], $get, $post);
+die();*/
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($post)) {
             $datos = [
                 'id_prestamo' => $post['id_prestamo'],       // oculto en el form
@@ -877,41 +737,37 @@ class ControladorPrestamos
 class ControladorFrente {
 
     public function ejecutar($controlador, $accion) {
-        //session_start();
-        if (!isset($_SESSION['usuario']) && !($controlador == 'usuarios' && $accion == 'validar')) {
-            // No está logueado y no está intentando loguear
-            
-            header("Location: index.php?controlador=usuarios&accion=validar");
-            exit();
-        }else{
-            switch($controlador) {
-                case 'libros':
-                    require_once("ControladorLibros.php");
-                    $ctrl = new ControladorLibros();
-                    break;
-                case 'usuarios':
-                    require_once("ControladorUsuarios.php");
-                    $ctrl = new ControladorUsuarios();
-                    break;
-                case 'prestamos':
-                    require_once("ControladorPrestamos.php");
-                    $ctrl = new ControladorPrestamos();
-                    break;
-                case 'ejemplares':
-                    require_once("ControladorEjemplares.php");
-                    $ctrl = new ControladorEjemplares();
-                    break;
-                case 'general':
-                default:
-                    include(__DIR__."/../vista/VistaMenu.php");
-                    return;
-                    break;
-            }
-            if (method_exists($ctrl, $accion)) {
-                $ctrl->$accion($_GET, $_POST);
-            } else {
-                echo "Acción '$accion' no encontrada en el controlador '$controlador'.";
-            }       
+        switch($controlador) {
+            case 'libros':
+                require_once("ControladorLibros.php");
+                $ctrl = new ControladorLibros();
+                break;
+
+            case 'usuarios':
+                require_once("ControladorUsuarios.php");
+                $ctrl = new ControladorUsuarios();
+                break;
+
+            case 'prestamos':
+                require_once("ControladorPrestamos.php");
+                $ctrl = new ControladorPrestamos();
+                break;
+            case 'ejemplares':
+                require_once("ControladorEjemplares.php");
+                $ctrl = new ControladorEjemplares();
+                break;
+            case 'general':
+            default:
+                include(__DIR__."/../vista/VistaMenu.php");
+                return;
+                break;
+        }
+
+        
+        if (method_exists($ctrl, $accion)) {
+            $ctrl->$accion($_GET, $_POST);
+        } else {
+            echo "Acción '$accion' no encontrada en el controlador '$controlador'.";
         }
     }
 }
@@ -990,12 +846,14 @@ class ControladorLibros
 ?><?php
 // formularioUsuario.php
 
+// Si existen datos del usuario (modo edición), los tomamos.
+// Si no, dejamos los campos vacíos (modo alta).
 $cedula = $usuario['cedula'] ?? '';
 $nombre = $usuario['nombre'] ?? '';
-$apellido = $usuario['direccion'] ?? '';
-$contrasena = $usuario['contrasena'] ?? '';
-$perfil = $usuario['perfil'] ?? 'usuario';
+$apellido = $usuario['apellido'] ?? '';
 
+// Si estamos editando, el formulario se enviará a "editar",
+// si no, a "crear".
 $accion = isset($usuario) ? 'editar' : 'crear';
 ?>
 
@@ -1005,11 +863,32 @@ $accion = isset($usuario) ? 'editar' : 'crear';
     <meta charset="UTF-8">
     <title><?= isset($usuario) ? 'Editar Usuario' : 'Agregar Usuario' ?></title>
     <style>
-        form { width: 320px; margin: 40px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        label { display: block; margin-top: 10px; }
-        input, select, button { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
-        button { cursor: pointer; }
-        a { display: inline-block; margin-top: 10px; text-align: center; width: 100%; }
+        form {
+            width: 320px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, button {
+            width: 100%;
+            padding: 6px;
+            margin-top: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            cursor: pointer;
+        }
+        a {
+            display: inline-block;
+            margin-top: 10px;
+            text-align: center;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -1020,25 +899,14 @@ $accion = isset($usuario) ? 'editar' : 'crear';
 
 <form action="index.php?controlador=usuarios&accion=<?= $accion ?>" method="POST">
     <label for="cedula">Cédula:</label>
-    <input type="text" name="cedula" id="cedula" value="<?= htmlspecialchars($cedula) ?>" 
+    <input type="number" name="cedula" id="cedula" value="<?= htmlspecialchars($cedula) ?>" 
            <?= isset($usuario) ? 'readonly' : 'required' ?>>
 
     <label for="nombre">Nombre:</label>
     <input type="text" name="nombre" id="nombre" value="<?= htmlspecialchars($nombre) ?>" required>
 
     <label for="apellido">Apellido:</label>
-    <input type="text" name="direccion" id="direccion" value="<?= htmlspecialchars($apellido) ?>" required>
-
-    <label for="contrasena">Contraseña:</label>
-    
-    <input type="text" name="contrasena" id="contrasena" value="<?= htmlspecialchars($contrasena) ?>" 
-           <?= isset($usuario) ? '' : 'required' ?>>
-
-    <label for="perfil">Perfil:</label>
-    <select name="perfil" id="perfil">
-        <option value="usuario" <?= $perfil=='usuario' ? 'selected' : '' ?>>Usuario</option>
-        <option value="administrador" <?= $perfil=='administrador' ? 'selected' : '' ?>>Administrador</option>
-    </select>
+    <input type="text" name="apellido" id="apellido" value="<?= htmlspecialchars($apellido) ?>" required>
 
     <button type="submit">
         <?= isset($usuario) ? 'Guardar Cambios' : 'Agregar Usuario' ?>
@@ -1046,8 +914,7 @@ $accion = isset($usuario) ? 'editar' : 'crear';
 
     <a href="index.php?controlador=usuarios&accion=listar">Cancelar</a>
 </form>
-
-<a href="index.php?controlador=usuarios&accion=listar">⬅ Volver a la lista</a>
+<a href="index.php?controlador=usuario&accion=listar">⬅ Volver a la lista</a>
 </body>
 </html>
 <!DOCTYPE html>
@@ -1057,12 +924,10 @@ $accion = isset($usuario) ? 'editar' : 'crear';
 </head>
 <body>
     <h1>Bienvenido al Sistema de Biblioteca</h1>
-    <li><a href="/../index.php?controlador=usuarios&accion=logout">Cerrar sesión</a></li>
-
     <ul>
-        <li><a href="/../index.php?controlador=libros&accion=listar">Libros</a></li>
-        <li><a href="/../index.php?controlador=prestamos&accion=listar">Préstamos</a></li>
-        <li><a href="/../index.php?controlador=usuarios&accion=listar">Usuarios</a></li>
+        <li><a href="index.php?controlador=libros&accion=listar">Libros</a></li>
+        <li><a href="index.php?controlador=prestamos&accion=listar">Préstamos</a></li>
+        <li><a href="index.php?controlador=usuarios&accion=listar">Usuarios</a></li>
     </ul>
 </body>
 </html><!DOCTYPE html>
@@ -1178,7 +1043,7 @@ $accion = isset($usuario) ? 'editar' : 'crear';
 <h2 style="text-align:center;">Gestión de Libros</h2>
 
 <a href="index.php?controlador=general">⬅ Volver al Menu</a>
-<?php if (isset($_SESSION['usuario']['perfil']) && $_SESSION['usuario']['perfil'] === 'administrador'): ?>
+<?php if (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'administrador'): ?>
     <div style="text-align:center; margin-bottom: 20px;">
         <a href="index.php?controlador=libros&accion=crear">Agregar Libro</a>        
     </div>
@@ -1204,8 +1069,9 @@ $accion = isset($usuario) ? 'editar' : 'crear';
                     <td><?php echo $libro['titulo']; ?></td>
                     <td><?php echo $libro['autor']; ?></td>                    
                     <td><?php echo $libro['editorial']; ?></td>
-                    <td>                            
-                        <?php if (isset($_SESSION['usuario']['perfil']) && $_SESSION['usuario']['perfil'] === 'administrador'): ?>
+                    <td>
+                        <a href="index.php?controlador=libros&accion=ver&id=<?php echo $libro['id']; ?>">Ver</a>     
+                        <?php if (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'administrador'): ?>
                             <a href="index.php?controlador=libros&accion=editar&id=<?php echo $libro['id']; ?>">Editar</a>
                             <a href="index.php?controlador=libros&accion=eliminar&id=<?php echo $libro['id']; ?>"
                                 onclick="return confirm('¿Seguro que quieres eliminar este libro?')">Eliminar</a>
@@ -1297,72 +1163,6 @@ $accion = $id ? 'editar&id=' . $id : 'crear';
 <a href="index.php?controlador=libros&accion=listar">⬅ Volver a la lista</a>
 </body>
 </html>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    
-    <title>Login - Biblioteca</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        form {
-            background-color: #fff;
-            padding: 30px 40px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 300px;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-        input {
-            width: 100%;
-            padding: 6px;
-            margin-top: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 8px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover { background-color: #45a049; }
-        .error { color: red; margin-top: 10px; text-align: center; }
-    </style>
-</head>
-<body>
-
-<form action="index.php?controlador=usuarios&accion=validar" method="POST">
-    <h2 style="text-align:center;">Login</h2>
-        
-    <label for="cedula">Cédula:</label>
-    <input type="number" name="cedula" id="cedula" required>
-
-    <label for="password">Contraseña:</label>
-    <input type="password" name="password" id="password" required>
-
-    <button type="submit">Ingresar</button>
-
-    <?php if (isset($error)): ?>
-        <div class="error"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-</form>
-
-</body>
-</html>
 <h2 style="text-align:center;">Gestión de Ejemplares</h2>
 
 <?php if (isset($libro)): ?>
@@ -1372,8 +1172,7 @@ $accion = $id ? 'editar&id=' . $id : 'crear';
     </p>
 <?php endif; ?>
 <a href="index.php?controlador=prestamos&accion=listar">⬅ Volver a la lista Prestamos</a>
-<a href="index.php?controlador=libros&accion=listar"><br>⬅ Volver a la lista Libros</a>
-<a href="index.php?controlador=general"><br>⬅ Volver al Menu</a>
+<a href="index.php?controlador=general">⬅ Volver al Menu</a>
 <div style="text-align:center; margin-bottom: 15px;">
     <a href="index.php?controlador=ejemplares&accion=crear&id_libro=<?php echo $libro['id']; ?>">
         Agregar Ejemplar
@@ -1409,8 +1208,9 @@ $accion = $id ? 'editar&id=' . $id : 'crear';
 <?php
 // VistaPrestamos.php
 
-$filtro_estado = $_GET['filtro_estado'] ?? 'todos';
-
+// $prestamos viene del controlador
+// $filtro_estado viene del controlador o $_GET
+$filtro_estado = $filtro_estado ?? 'todos';
 ?>
 
 <!DOCTYPE html>
@@ -1449,7 +1249,6 @@ $filtro_estado = $_GET['filtro_estado'] ?? 'todos';
 
 <h2 style="text-align:center;">Gestión de Préstamos</h2>
 <a href="index.php?controlador=general">⬅ Volver al Menu</a>
-
 <!-- Filtro de préstamos -->
 <form action="index.php" method="GET">
     <input type="hidden" name="controlador" value="prestamos">
@@ -1457,8 +1256,8 @@ $filtro_estado = $_GET['filtro_estado'] ?? 'todos';
 
     <label>Mostrar:</label>
     <select name="filtro_estado">
-        <option value="todos" <?= ($filtro_estado == 'todos') ? 'selected' : '' ?>>Todos</option>
-        <option value="Pendiente" <?= ($filtro_estado == 'Pendiente') ? 'selected' : '' ?>>Pendientes</option>
+        <option value="todos" <?= ($filtro_estado=='todos') ? 'selected' : '' ?>>Todos</option>
+        <option value="pendientes" <?= ($filtro_estado=='pendientes') ? 'selected' : '' ?>>Pendientes</option>
     </select>
     <button type="submit">Aplicar</button>
 </form>
@@ -1474,7 +1273,7 @@ $filtro_estado = $_GET['filtro_estado'] ?? 'todos';
         <th>Fecha Préstamo</th>
         <th>Fecha Prevista Devolución</th>
         <th>Fecha Devolución</th>
-        <th>Estado Préstamo</th>
+        <th>Estado (Ejemplar)</th>
         <th>Acciones</th>
     </tr>
 
@@ -1486,17 +1285,15 @@ $filtro_estado = $_GET['filtro_estado'] ?? 'todos';
             $fecha_prevista = new DateTime($p['fecha_prevista_devolucion']);
             $fecha_devuelto = !empty($p['fecha_devolucion']) ? new DateTime($p['fecha_devolucion']) : null;
 
-            if (isset($fecha_devuelto)) {
-                $estadoMostrar = 'Devuelto';
-            }else{
-                if($fecha_prevista < $hoy) {
-                    $estadoMostrar = 'Vencido';
-                }
-                if($fecha_prevista >= $hoy){
-                    $estadoMostrar = 'Pendiente';
-                }
+            if ($p['estado_ejemplar'] === 'disponible') {
+                $estado = 'Devuelto';
+            } 
+            if($fecha_prevista < $hoy && $p['estado_ejemplar'] === 'prestado') {
+                $estado = 'Vencido';
             }
-            if($filtro_estado == 'todos' || $filtro_estado == $estadoMostrar):
+            if($fecha_prevista >= $hoy && $p['estado_ejemplar'] === 'prestado'){
+                $estado = 'Pendiente';
+            }
             ?>
             <tr>
                 <td><?= htmlspecialchars($p['cedula']) ?></td>
@@ -1505,16 +1302,16 @@ $filtro_estado = $_GET['filtro_estado'] ?? 'todos';
                 <td><?= $p['fecha_prevista_devolucion'] ?></td>
                 <td><?= $p['fecha_devolucion'] ?? '-' ?></td>
                 <td class="<?= $p['estado_ejemplar'] ?>">
-                <?= $estadoMostrar ?></td>
+                <?= $estado ?></td>
                 <td>
-                    <?php if ($estadoMostrar == 'Pendiente' || $estadoMostrar == 'Vencido'): ?>
+                    <?php if ($estado == 'Pendiente' || $estado == 'Vencido'): ?>
                         <a href="index.php?controlador=prestamos&accion=marcarDevuelto&id=<?= $p['id_prestamo'] ?>">Devolver</a>
-                    <?php endif; ?>                    
+                    <?php endif; ?>
+                    &nbsp;|&nbsp;
                     <a href="index.php?controlador=prestamos&accion=eliminar&id=<?= $p['id_prestamo'] ?>"
                        onclick="return confirm('¿Seguro que querés eliminar este préstamo?');">Eliminar</a>
                 </td>
             </tr>
-            <?php endif; ?>
         <?php endforeach; ?>
     <?php else: ?>
         <tr><td colspan="8">No hay préstamos para mostrar.</td></tr>
@@ -1523,18 +1320,6 @@ $filtro_estado = $_GET['filtro_estado'] ?? 'todos';
 
 </body>
 </html>
-<?php
-// Iniciar sesión si no está iniciada
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Redirigir al login si no hay usuario
-if (!isset($_SESSION['usuario'])) {
-    header("Location: VistaLogin.php");
-    exit();
-}
-?>
 <?php
 // VistaPrestamoNuevo.php
 ?>
@@ -1588,15 +1373,6 @@ if (!isset($_SESSION['usuario'])) {
 </head>
 <body>
 
-<!--  si hay mensaje de error, mostrarlo -->
-<?php if (!empty($errorMensaje)): ?>
-<script>
-    alert("<?= $errorMensaje ?>");
-</script>
-<?php endif; ?>
-
-
-<!-- formulario de nuevo préstamo -->
 <h2>Registrar nuevo préstamo</h2>
 
 <form action="index.php?controlador=prestamos&accion=crear" method="POST">
@@ -1692,7 +1468,8 @@ if (!isset($_SESSION['usuario'])) {
                 <td><?= htmlspecialchars($u['cedula']) ?></td>
                 <td><?= htmlspecialchars($u['nombre']) ?></td>
                 <td><?= htmlspecialchars($u['direccion']) ?></td>
-                <td>                    
+                <td>
+                    <a href="index.php?controlador=usuarios&accion=ver&cedula=<?= $u['cedula'] ?>">Ver</a> |
                     <a href="index.php?controlador=usuarios&accion=editar&cedula=<?= $u['cedula'] ?>">Editar</a> |
                     <a href="index.php?controlador=usuarios&accion=eliminar&cedula=<?= $u['cedula'] ?>"
                        onclick="return confirm('¿Seguro que querés eliminar este usuario?');">Eliminar</a>
@@ -1767,13 +1544,13 @@ $accion   = isset($ejemplar) ? "editar&id_ejemplar=" . $ejemplar['id_ejemplar'] 
 <?php
 
 session_start(); // iniciar sesión
-//$_SESSION = [];
+
 // Mockear un usuario administrador para pruebas
-/*if (!isset($_SESSION['tipo'])) {
+if (!isset($_SESSION['tipo'])) {
     $_SESSION['usuario'] = 'admin';
     $_SESSION['tipo'] = 'administrador';
 }
-*/
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);

@@ -72,28 +72,8 @@ class Prestamo
     public function create($datos)
     {
         $this->set_names();
-        
-        // Consultar si ejemplar disponible
-        
-        $sqlCheck = "SELECT estado FROM ejemplar WHERE id_ejemplar = ?";
-        $stmtCheck = mysqli_prepare($this->dbh, $sqlCheck);
-        mysqli_stmt_bind_param($stmtCheck, "i", $datos['id_ejemplar']);
-        mysqli_stmt_execute($stmtCheck);
-        $resultado = mysqli_stmt_get_result($stmtCheck);
-        $ejemplar = mysqli_fetch_assoc($resultado);
-        mysqli_stmt_close($stmtCheck);
-
-        if (!$ejemplar) {
-            return ["error" => true, "mensaje" => "El ejemplar no existe"];
-        }
-
-        if ($ejemplar['estado'] !== 'disponible') {
-            return ["error" => true, "mensaje" => "El ejemplar no está disponible"];
-        }       
-        
-        
-        $sql1 = "INSERT INTO prestamo (cedula, id_ejemplar, fecha_prestamo, fecha_prevista_devolucion) VALUES (?, ?, ?, ?)";
-        $stmt = mysqli_prepare($this->dbh, $sql1);
+        $sql = "INSERT INTO prestamo (cedula, id_ejemplar, fecha_prestamo, fecha_prevista_devolucion) VALUES (?, ?, ?, ?)";
+        $stmt = mysqli_prepare($this->dbh, $sql);
         mysqli_stmt_bind_param(
             $stmt,
             "iiss",
@@ -126,10 +106,10 @@ class Prestamo
         $this->set_names();
 
         // Actualizar la fecha de devolución del préstamo
-        $sql1 = "UPDATE prestamo 
+        $sql = "UPDATE prestamo 
                 SET fecha_devolucion = ? 
                 WHERE id_prestamo = ?";
-        $stmt = mysqli_prepare($this->dbh, $sql1);
+        $stmt = mysqli_prepare($this->dbh, $sql);
         mysqli_stmt_bind_param($stmt, "si", $datos['fecha_devolucion'], $datos['id_prestamo']);
 
         if (!mysqli_stmt_execute($stmt)) {

@@ -34,28 +34,51 @@ class ControladorPrestamos
     public function crear($get = [], $post = [])
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($post)) {
+            
+            // --- INICIO DE LA modificacion ---
+            $id_ejemplar = $post['id_ejemplar'];
+            $cedula = $post['cedula'];
+
+            $ejemplar = $this->ejemplarModel->getById($id_ejemplar);
+            $usuario = $this->usuarioModel->getByCedula($cedula);
+
+            $error = null;
+
+            if (!$usuario) {
+                $error = "La cédula '$cedula' no existe. Verifique el usuario.";
+            } else if (!$ejemplar) {
+                $error = "El ID de ejemplar '$id_ejemplar' no existe.";
+            } else if ($ejemplar['estado'] == 'prestado') {
+                $error = "Error: El ejemplar (ID: $id_ejemplar) ya se encuentra prestado.";
+            }
+
+            if ($error) {
+                // Si hay un error, volvemos a mostrar el formulario con el mensaje
+                $usuarios = $this->usuarioModel->getAll();
+                // Pasamos $error a la vista
+                include(__DIR__ . "/../vista/formularioPrestamo.php");
+                return; // Detenemos la ejecución
+            }
+            // --- FIN DE LA modificacion ---
+
+
+            // Si no hayy error, continuamos con la creación
             $datos = [
                 'cedula' => $post['cedula'],
                 'id_ejemplar' => $post['id_ejemplar'],
                 'fecha_prestamo' => $post['fecha_prestamo'],
                 'fecha_prevista_devolucion' => $post['fecha_prevista_devolucion']
             ];
-            $resultado = $this->prestamoModel->create($datos);
+            $this->prestamoModel->create($datos);
+            header("Location: index.php?controlador=prestamos&accion=listar");
+            exit;
 
-            if (!empty($resultado['error'])) {
-                $errorMensaje = $resultado['mensaje'];
-                $usuarios = $this->usuarioModel->getAll();
-                include(__DIR__ . "/../vista/formularioPrestamo.php");
-            } else {
-                header("Location: index.php?controlador=prestamos&accion=listar");
-                exit;
-            }
         } else {
+            // Carga normal del formulario (GET)
             $usuarios = $this->usuarioModel->getAll();
             include(__DIR__ . "/../vista/formularioPrestamo.php");
         }
     }
-
 
     // DEVOLVER/EDITAR PRÉSTAMO
     public function marcarDevuelto($get = [], $post = [])

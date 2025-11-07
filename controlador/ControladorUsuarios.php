@@ -11,9 +11,14 @@ class ControladorUsuarios
     }
 
     // LISTAR USUARIOS
+   // LISTAR USUARIOS
     public function listar($get = [], $post = [])
     {
-        $usuarios = $this->usuarioModel->getAll();
+        // --- INICIO DE LA CORRECCIÓN ---
+        $busqueda = $get['busqueda'] ?? null;
+        $usuarios = $this->usuarioModel->getAll($busqueda);
+        // --- FIN DE LA CORRECCIÓN ---
+
         include(__DIR__ . "/../vista/VistaUsuarios.php");
     }
 
@@ -49,27 +54,33 @@ class ControladorUsuarios
         }
     }
 
-    // EDITAR USUARIO
+   // EDITAR USUARIO
     public function editar($get = [], $post = [])
     {
-        $cedula = $get['cedula'] ?? null;
+        $cedula = $get['cedula'] ?? $post['cedula'] ?? null; // Cédula puede venir por GET o POST (en el form)
         
         if (!$cedula) {
             echo "No se especificó un usuario.";        
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($post)) {
+            
+            // --- INICIO DE LA modifica ---
             $datos = [
-                'nombre'   => $post['nombre'],
-                'direccion' => $post['direccion'],
-                'perfil'    => $post['perfil'],
-                'contrasena' => $post['contrasena']
+                'nombre'     => $post['nombre'],
+                'direccion'  => $post['direccion'],
+                'perfil'     => $post['perfil'],
+                'contrasena' => $post['contrasena'] // Pasa la contraseña (vacía o no)
             ];
+            // --- FIN DE LA modifica ---
+
             $this->usuarioModel->update($cedula, $datos);
             header("Location: index.php?controlador=usuarios&accion=listar");
             exit;
+
         } else {
-            $usuario = $this->usuarioModel->getByCedulaConLogin($cedula);
+            // Carga por GET
+            $usuario = $this->usuarioModel->getByCedula($cedula);
             include(__DIR__ . "/../vista/formularioUsuario.php");
         }
     }
@@ -104,10 +115,14 @@ class ControladorUsuarios
                     'cedula'   => $usuarioDatos['cedula'],
                     'nombre'   => $usuarioDatos['nombre'],
                     'direccion' => $usuarioDatos['direccion'],
-                    'perfil'   => $this->usuarioModel->obtenerPerfil($cedula)
+                    'perfil'   => $loginDatos['perfil'] // desde login
                 ];
-                
-                header("Location: /../vista/VistaMenu.php");
+
+                header("Location: index.php?controlador=general&accion=inicio"); // <-- ASÍ
+                exit();
+
+                //header("Location: ../vista/VistaMenu.php"); linea original
+                header("Location: index.php?controlador=general&accion=inicio");
                 exit();
             } else {
                 $error = "Cédula o contraseña incorrecta";

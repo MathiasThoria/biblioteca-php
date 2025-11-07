@@ -10,12 +10,16 @@ class ControladorLibros
         $this->libroModel = new Libro();
     }
 
-    // LISTAR TODOS LOS LIBROS
-    public function listar($get = [], $post = [])
-    {
-        $libros = $this->libroModel->getAll();        
-        include(__DIR__ . '/../vista/VistaLibros.php');
-    }
+  // LISTAR TODOS LOS LIBROS
+public function listar($get = [], $post = [])
+{
+    // --- INICIO DE LA modifica ---
+    $busqueda = $get['busqueda'] ?? null;
+    $libros = $this->libroModel->getAll($busqueda);        
+    // --- FIN DE LA modifica ---
+
+    include(__DIR__ . '/../vista/VistaLibros.php');
+}
 
     // VER UN LIBRO POR ID
     public function ver($get = [], $post = [])

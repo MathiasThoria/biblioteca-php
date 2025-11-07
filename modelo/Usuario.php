@@ -15,39 +15,50 @@ class Usuario
         return $this->dbh->query("SET NAMES 'utf8'");
     }
 
-    // OBTENER TODOS LOS USUARIOS
-    public function getAll()
+    // OBTENER TODOS LOS USUARIOS (CON BUSCADOR)
+    public function getAll($busqueda = null)
     {
         $this->set_names();
+        
+        // --- INICIO DE LA modi ---
         $sql = "SELECT * FROM usuario";
-        $resultado = $this->dbh->query($sql);
-        return $resultado->fetch_all(MYSQLI_ASSOC);
+        
+        if ($busqueda) {
+            $termino = "%" . $busqueda . "%";
+            // Buscamos por cédula (que es un CHAR) o por nombre
+            $sql .= " WHERE cedula LIKE ? OR nombre LIKE ?";
+        }
+
+        $stmt = mysqli_prepare($this->dbh, $sql);
+        
+        if ($busqueda) {
+            // "ss" porque buscamos en dos campos de texto (char y varchar)
+            mysqli_stmt_bind_param($stmt, "ss", $termino, $termino);
+        }
+        
+        mysqli_stmt_execute($stmt);
+        $resultado = mysqli_stmt_get_result($stmt);
+
+        if (!$resultado) {
+            die("Error al listar usuarios: " . mysqli_error($this->dbh));
+        }
+
+        $usuarios = $resultado->fetch_all(MYSQLI_ASSOC);
+        mysqli_stmt_close($stmt);
+        return $usuarios;
+        // --- FIN DE LA modi ---
     }
 
-    // OBTENER USUARIO POR CÉDULA
+   // OBTENER USUARIO POR CÉDULA (CON DATOS DE LOGIN)
     public function getByCedula($cedula)
     {
         $this->set_names();
-        $sql = "SELECT * FROM usuario WHERE cedula = ?";
-        $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $cedula);
-        mysqli_stmt_execute($stmt);
-        $resultado = mysqli_stmt_get_result($stmt);
-        $usuario = mysqli_fetch_assoc($resultado);
-        mysqli_stmt_close($stmt);
-        return $usuario;
-    }
-
-    // OBTENER USUARIO POR CÉDULA CON DATOS DE LOGIN
-    public function getByCedulaConLogin($cedula)
-    {
-        $this->set_names();
-        $sql = "SELECT u.*, l.perfil, l.contrasena
+        $sql = "SELECT u.*, l.perfil, l.contrasena 
                 FROM usuario u
                 LEFT JOIN login l ON u.cedula = l.id_usuario
                 WHERE u.cedula = ?";
         $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $cedula);
+        mysqli_stmt_bind_param($stmt, "s", $cedula); // Cédula es char, usamos 's'
         mysqli_stmt_execute($stmt);
         $resultado = mysqli_stmt_get_result($stmt);
         $usuario = mysqli_fetch_assoc($resultado);
@@ -81,17 +92,37 @@ class Usuario
         mysqli_stmt_close($stmt2);
     }
 
-    // EDITAR USUARIO
+   // EDITAR USUARIO
     public function update($cedula, $datos)
     {
         $this->set_names();
-        $sql = "UPDATE usuario SET nombre = ?, direccion = ? WHERE cedula = ?";
-        $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "ssi", $datos['nombre'], $datos['direccion'], $cedula);
-        if (!mysqli_stmt_execute($stmt)) {
-            die("Error al actualizar usuario: " . mysqli_stmt_error($stmt));
+        
+        // 1. Actualizar tabla 'usuario'
+        $sql1 = "UPDATE usuario SET nombre = ?, direccion = ? WHERE cedula = ?";
+        $stmt1 = mysqli_prepare($this->dbh, $sql1);
+        mysqli_stmt_bind_param($stmt1, "sss", $datos['nombre'], $datos['direccion'], $cedula);
+        if (!mysqli_stmt_execute($stmt1)) {
+            die("Error al actualizar usuario: " . mysqli_stmt_error($stmt1));
         }
-        mysqli_stmt_close($stmt);
+        mysqli_stmt_close($stmt1);
+
+        // 2. Actualizar tabla 'login' (perfil y contraseña)
+        // Solo actualiza la contraseña SI se proporcionó una nueva
+        if (!empty($datos['contrasena'])) {
+            $sql2 = "UPDATE login SET perfil = ?, contrasena = ? WHERE id_usuario = ?";
+            $stmt2 = mysqli_prepare($this->dbh, $sql2);
+            mysqli_stmt_bind_param($stmt2, "sss", $datos['perfil'], $datos['contrasena'], $cedula);
+        } else {
+            // Si la contraseña vino vacía, no la actualiza (mantiene la existente)
+            $sql2 = "UPDATE login SET perfil = ? WHERE id_usuario = ?";
+            $stmt2 = mysqli_prepare($this->dbh, $sql2);
+            mysqli_stmt_bind_param($stmt2, "ss", $datos['perfil'], $cedula);
+        }
+        
+        if (!mysqli_stmt_execute($stmt2)) {
+            die("Error al actualizar login: " . mysqli_stmt_error($stmt2));
+        }
+        mysqli_stmt_close($stmt2);
     }
 
     // ELIMINAR USUARIO
@@ -128,18 +159,6 @@ class Usuario
         $usuario = mysqli_fetch_assoc($resultado);
         mysqli_stmt_close($stmt);
         return $usuario ? true : false;
-    }
-    // OBTENER PERFIL DE USUARIO - tabla login
-    public function obtenerPerfil($cedula) {
-        $this->set_names();
-        $sql = "SELECT perfil FROM login WHERE id_usuario = ?";
-        $stmt = mysqli_prepare($this->dbh, $sql);
-        mysqli_stmt_bind_param($stmt, "s", $cedula);
-        mysqli_stmt_execute($stmt);
-        $resultado = mysqli_stmt_get_result($stmt);
-        $usuario = mysqli_fetch_assoc($resultado);
-        mysqli_stmt_close($stmt);
-        return $usuario ? $usuario['perfil'] : null;
     }
 
 }

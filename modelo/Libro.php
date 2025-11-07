@@ -17,13 +17,30 @@ class Libro
         return mysqli_set_charset($this->dbh, "utf8");
     }
 
-    // LISTAR TODOS LOS LIBROS
-    public function getAll()
+    // LISTAR TODOS LOS LIBROS (CON BUSCADOR)
+    public function getAll($busqueda = null)
     {
         self::set_names();
         $this->libros = array();
+        
+        // --- INICIO DE LA CORRECCIÓN ---
         $sql = "SELECT * FROM libros";
-        $resultado = mysqli_query($this->dbh, $sql);
+        
+        if ($busqueda) {
+            $termino = "%" . $busqueda . "%";
+            $sql .= " WHERE titulo LIKE ? OR autor LIKE ?";
+        }
+        
+        $stmt = mysqli_prepare($this->dbh, $sql);
+        
+        if ($busqueda) {
+            mysqli_stmt_bind_param($stmt, "ss", $termino, $termino);
+        }
+        
+        mysqli_stmt_execute($stmt);
+        $resultado = mysqli_stmt_get_result($stmt);
+        // --- FIN DE LA CORRECCIÓN ---
+
         if ($resultado) {
             while ($fila = mysqli_fetch_assoc($resultado)) {
                 $this->libros[] = $fila;
@@ -31,6 +48,7 @@ class Libro
         } else {
             die("Error al listar libros: " . mysqli_error($this->dbh));
         }
+        mysqli_stmt_close($stmt);
         return $this->libros;
     }
 
